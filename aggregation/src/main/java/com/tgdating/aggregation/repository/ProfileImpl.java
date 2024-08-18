@@ -13,16 +13,14 @@ import java.time.LocalDateTime;
 @Component
 public class ProfileImpl implements ProfileRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-//    private static final String CREATE_PROFILE =
-//            "INSERT INTO profiles (session_id, display_name, birthday, gender, location, description," +
-//                    " height, weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible," +
-//                    " created_at, updated_at, last_online)" +
-//                    "  VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id";
+
 private static final String CREATE_PROFILE =
         "INSERT INTO profiles (session_id, display_name, birthday, gender, location, description," +
                 " height, weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible," +
                 " created_at, updated_at, last_online)" +
-                " VALUES (:session_id, :display_name, :birthday, :gender, :location, :description, :height, :weight, :is_deleted, :is_blocked, :is_premium, :is_show_distance, :is_invisible, :created_at, :updated_at, :last_online)";
+                " VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height, :weight," +
+                " :isDeleted, :isBlocked, :isPremium, :isShowDistance, :isInvisible, :createdAt, :updatedAt," +
+                " :lastOnline)";
 
     public ProfileImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -51,7 +49,7 @@ private static final String CREATE_PROFILE =
                     .addValue("lastOnline", LocalDateTime.now());
             namedParameterJdbcTemplate.update(CREATE_PROFILE, parameters);
             return namedParameterJdbcTemplate.queryForObject(
-                    "SELECT * FROM profiles WHERE location = :location",
+                    "SELECT * FROM profiles WHERE session_id = :sessionId",
                     parameters,
                     (resultSet, i) -> ProfileEntity.builder()
                             .id(resultSet.getLong("id"))
