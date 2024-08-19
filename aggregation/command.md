@@ -7,3 +7,10 @@ sudo apt install postgis postgresql-16-postgis-3
 sudo -u postgres psql -c "CREATE EXTENSION postgis;" tgbot
 sudo systemctl restart postgresql
 ```
+
+Keycloak
+```
+export KEYCLOAK_ADMIN=root
+export KEYCLOAK_ADMIN_PASSWORD=root
+./kc.sh start-dev --http-port=8181
+```

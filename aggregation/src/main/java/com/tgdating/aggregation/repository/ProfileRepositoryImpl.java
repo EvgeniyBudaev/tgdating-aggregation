@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Component
-public class ProfileImpl implements ProfileRepository {
+public class ProfileRepositoryImpl implements ProfileRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
 private static final String CREATE_PROFILE =
@@ -22,7 +22,7 @@ private static final String CREATE_PROFILE =
                 " :isDeleted, :isBlocked, :isPremium, :isShowDistance, :isInvisible, :createdAt, :updatedAt," +
                 " :lastOnline)";
 
-    public ProfileImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
