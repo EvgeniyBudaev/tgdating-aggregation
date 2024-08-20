@@ -42,10 +42,10 @@ private static final String CREATE_PROFILE =
                     .addValue("isDeleted", false)
                     .addValue("isBlocked", false)
                     .addValue("isPremium", false)
-                    .addValue("isShowDistance", false)
+                    .addValue("isShowDistance", true)
                     .addValue("isInvisible", false)
                     .addValue("createdAt", LocalDateTime.now())
-                    .addValue("updatedAt", LocalDateTime.now())
+                    .addValue("updatedAt", null)
                     .addValue("lastOnline", LocalDateTime.now());
             namedParameterJdbcTemplate.update(CREATE_PROFILE, parameters);
             return namedParameterJdbcTemplate.queryForObject(
@@ -67,7 +67,7 @@ private static final String CREATE_PROFILE =
                             .isShowDistance(resultSet.getBoolean("is_show_distance"))
                             .isInvisible(resultSet.getBoolean("is_invisible"))
                             .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(resultSet.getTimestamp("updated_at").toLocalDateTime())
+                            .updatedAt(null)
                             .lastOnline(resultSet.getTimestamp("last_online").toLocalDateTime())
                             .build()
             );

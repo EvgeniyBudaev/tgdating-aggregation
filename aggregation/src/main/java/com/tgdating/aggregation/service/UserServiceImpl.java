@@ -1,5 +1,6 @@
 package com.tgdating.aggregation.service;
 
+import com.tgdating.aggregation.dto.response.ResponseUserDto;
 import com.tgdating.aggregation.model.UserCreateRecord;
 import com.tgdating.aggregation.model.UserUpdateRecord;
 import jakarta.ws.rs.core.Response;
@@ -30,7 +31,7 @@ public class UserServiceImpl implements UserService {
     private String defaultUserGroup;
 
     @Override
-    public UserRepresentation createUser(UserCreateRecord userCreateRecord) {
+    public ResponseUserDto createUser(UserCreateRecord userCreateRecord) {
         UserRepresentation userRepresentation = new UserRepresentation();
         userRepresentation.setEnabled(true);
         userRepresentation.setUsername(userCreateRecord.username());
@@ -66,7 +67,17 @@ public class UserServiceImpl implements UserService {
 
         // TODO: расскоментировать после создания и проверки почты
 //        sendVerificationEmail(user.getId());
-        return userResource.toRepresentation();
+
+        ResponseUserDto responseUserDto = new ResponseUserDto();
+        responseUserDto.setId(user.getId());
+        responseUserDto.setUsername(user.getUsername());
+        responseUserDto.setFirstName(user.getFirstName());
+        responseUserDto.setLastName(user.getLastName());
+        responseUserDto.setEmail(user.getEmail());
+        responseUserDto.setIsEnabled(user.isEnabled());
+        responseUserDto.setIsEmailVerified(user.isEmailVerified());
+
+        return responseUserDto;
     }
 
     @Override

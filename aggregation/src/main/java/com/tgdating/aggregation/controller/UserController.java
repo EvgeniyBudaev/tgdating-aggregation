@@ -1,6 +1,7 @@
 package com.tgdating.aggregation.controller;
 
 import com.tgdating.aggregation.aspect.LogMethodExecutionTime;
+import com.tgdating.aggregation.dto.response.ResponseUserDto;
 import com.tgdating.aggregation.model.UserCreateRecord;
 import com.tgdating.aggregation.model.UserUpdateRecord;
 import com.tgdating.aggregation.service.UserService;
@@ -20,7 +21,7 @@ public class UserController {
 
     @PostMapping
     @LogMethodExecutionTime
-    public ResponseEntity<UserRepresentation> createUser(@RequestBody UserCreateRecord userCreateRecord) {
+    public ResponseEntity<ResponseUserDto> createUser(@RequestBody UserCreateRecord userCreateRecord) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(userCreateRecord));
     }
 

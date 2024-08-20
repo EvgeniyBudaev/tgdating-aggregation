@@ -1,5 +1,6 @@
 package com.tgdating.aggregation.service;
 
+import com.tgdating.aggregation.dto.response.ResponseUserDto;
 import com.tgdating.aggregation.model.UserCreateRecord;
 import com.tgdating.aggregation.model.UserUpdateRecord;
 import org.keycloak.admin.client.resource.UserResource;
@@ -10,7 +11,7 @@ import org.keycloak.representations.idm.UserRepresentation;
 import java.util.List;
 
 public interface UserService {
-    UserRepresentation createUser(UserCreateRecord userCreateRecord);
+    ResponseUserDto createUser(UserCreateRecord userCreateRecord);
     UserRepresentation updateUser(UserUpdateRecord userUpdateRecord);
     void deleteUser(String userId);
     UserResource getUser(String userId);
