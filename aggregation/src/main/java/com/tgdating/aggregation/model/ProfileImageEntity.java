@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ProfileImageEntity {
     private Long id;
-    private Long profileId;
+    private String sessionId;
     private String name;
     private String url;
     private Long size;

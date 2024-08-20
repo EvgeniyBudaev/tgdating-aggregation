@@ -33,9 +33,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     private void uploadImages(RequestProfileCreateDto requestProfileCreateDto, Long profileId) {
         String sessionId = requestProfileCreateDto.getSessionId();
-        for (MultipartFile file: requestProfileCreateDto.getImage()) {
+        for (MultipartFile file : requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
-            addImageToDB(profileId, imageConverterRecord);
+            addImageToDB(sessionId, imageConverterRecord);
         }
     }
 
@@ -56,9 +56,9 @@ public class ProfileServiceImpl implements ProfileService {
         }
     }
 
-    private ProfileImageEntity addImageToDB(Long profileId, ImageConverterRecord imageConverterRecord) {
+    private ProfileImageEntity addImageToDB(String sessionId, ImageConverterRecord imageConverterRecord) {
         RequestProfileImageAddDto requestProfileImageAddDto = new RequestProfileImageAddDto();
-        requestProfileImageAddDto.setProfileId(profileId);
+        requestProfileImageAddDto.setSessionId(sessionId);
         requestProfileImageAddDto.setName(imageConverterRecord.name());
         requestProfileImageAddDto.setUrl(imageConverterRecord.url());
         requestProfileImageAddDto.setSize(imageConverterRecord.size());

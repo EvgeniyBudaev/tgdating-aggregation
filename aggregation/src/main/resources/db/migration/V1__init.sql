@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS profiles
 (
-    id               BIGSERIAL    NOT NULL PRIMARY KEY,
-    session_id       VARCHAR      NOT NULL UNIQUE,
+    id               BIGSERIAL    NOT NULL,
+    session_id       VARCHAR      NOT NULL UNIQUE PRIMARY KEY,
     display_name     VARCHAR(255) NOT NULL,
     birthday         DATE         NOT NULL,
     gender           VARCHAR(100),
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS profiles
 CREATE TABLE IF NOT EXISTS profile_images
 (
     id         BIGSERIAL NOT NULL PRIMARY KEY,
-    profile_id BIGINT    NOT NULL,
+    session_id VARCHAR    NOT NULL,
     name       VARCHAR(255),
     url        VARCHAR,
     size       BIGINT,
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS profile_images
     is_private BOOL     NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
-    CONSTRAINT fk_profile_images_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
+    CONSTRAINT fk_profile_images_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
 );
 
 -- CREATE TABLE IF NOT EXISTS profile_complaints (

@@ -27,9 +27,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     "  :updatedAt, :lastOnline)";
 
     private static final String ADD_PROFILE_IMAGE =
-            "INSERT INTO profile_images (profile_id, name, url, size, is_deleted, is_blocked, is_primary, is_private," +
+            "INSERT INTO profile_images (session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private," +
                     " created_at, updated_at)" +
-                    " VALUES (:profileId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate," +
+                    " VALUES (:sessionId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate," +
                     " :createdAt, :updatedAt) RETURNING id";
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -94,7 +94,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     public ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto) {
         try {
             MapSqlParameterSource parameters = new MapSqlParameterSource()
-                    .addValue("profileId", requestProfileImageAddDto.getProfileId())
+                    .addValue("sessionId", requestProfileImageAddDto.getSessionId())
                     .addValue("name", requestProfileImageAddDto.getName())
                     .addValue("url", requestProfileImageAddDto.getUrl())
                     .addValue("size", requestProfileImageAddDto.getSize())
@@ -112,7 +112,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     parameters,
                     (resultSet, i) -> ProfileImageEntity.builder()
                             .id(resultSet.getLong("id"))
-                            .profileId(resultSet.getLong("profile_id"))
+                            .sessionId(resultSet.getString("session_id"))
                             .name(resultSet.getString("name"))
                             .url(resultSet.getString("url"))
                             .size(resultSet.getLong("size"))

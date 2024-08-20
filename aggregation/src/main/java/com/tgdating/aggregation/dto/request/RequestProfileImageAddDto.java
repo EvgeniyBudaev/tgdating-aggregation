@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class RequestProfileImageAddDto {
-    private Long profileId;
+    private String sessionId;
     private String name;
     private String url;
     private Long size;
