@@ -12,12 +12,20 @@ import java.util.List;
 
 public interface UserService {
     ResponseUserDto createUser(UserCreateRecord userCreateRecord);
+
     UserRepresentation updateUser(UserUpdateRecord userUpdateRecord);
+
     void deleteUser(String userId);
+
     UserResource getUser(String userId);
+
     UserRepresentation getUserDetail(String userId);
+
     void sendVerificationEmail(String userId);
+
     void forgotPassword(String username);
+
     List<RoleRepresentation> getUserRoles(String userId);
+
     List<GroupRepresentation> getUserGroups(String userId);
 }

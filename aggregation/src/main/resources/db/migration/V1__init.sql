@@ -1,37 +1,39 @@
-CREATE TABLE IF NOT EXISTS profiles (
-                                        id BIGSERIAL NOT NULL PRIMARY KEY,
-                                        session_id VARCHAR NOT NULL UNIQUE,
-                                        display_name VARCHAR(255) NOT NULL,
-                                        birthday DATE NOT NULL,
-                                        gender VARCHAR(100),
-                                        location TEXT,
-                                        description TEXT,
-                                        height REAL NOT NULL DEFAULT 0 CHECK(height >= 0),
-                                        weight REAL NOT NULL DEFAULT 0 CHECK(weight >= 0),
-                                        is_deleted BOOL NOT NULL DEFAULT false,
-                                        is_blocked BOOL NOT NULL DEFAULT false,
-                                        is_premium BOOL NOT NULL DEFAULT false,
-                                        is_show_distance BOOL NOT NULL DEFAULT false,
-                                        is_invisible BOOL NOT NULL DEFAULT false,
-                                        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                                        updated_at TIMESTAMP NULL,
-                                        last_online TIMESTAMP NOT NULL CHECK (last_online >= created_at)
+CREATE TABLE IF NOT EXISTS profiles
+(
+    id               BIGSERIAL    NOT NULL PRIMARY KEY,
+    session_id       VARCHAR      NOT NULL UNIQUE,
+    display_name     VARCHAR(255) NOT NULL,
+    birthday         DATE         NOT NULL,
+    gender           VARCHAR(100),
+    location         TEXT,
+    description      TEXT,
+    height           REAL         NOT NULL DEFAULT 0 CHECK (height >= 0),
+    weight           REAL         NOT NULL DEFAULT 0 CHECK (weight >= 0),
+    is_deleted       BOOL         NOT NULL DEFAULT false,
+    is_blocked       BOOL         NOT NULL DEFAULT false,
+    is_premium       BOOL         NOT NULL DEFAULT false,
+    is_show_distance BOOL         NOT NULL DEFAULT false,
+    is_invisible     BOOL         NOT NULL DEFAULT false,
+    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP    NULL,
+    last_online      TIMESTAMP    NOT NULL CHECK (last_online >= created_at)
 );
 
-CREATE TABLE IF NOT EXISTS profile_images (
-                                              id BIGSERIAL NOT NULL PRIMARY KEY,
-                                              profile_id BIGINT NOT NULL,
-                                              name VARCHAR(255),
-    url TEXT,
-    size INTEGER,
+CREATE TABLE IF NOT EXISTS profile_images
+(
+    id         BIGSERIAL NOT NULL PRIMARY KEY,
+    profile_id BIGINT    NOT NULL,
+    name       VARCHAR(255),
+    url        VARCHAR,
+    size       BIGINT,
+    is_deleted BOOL      NOT NULL DEFAULT false,
+    is_blocked BOOL      NOT NULL DEFAULT false,
+    is_primary BOOL      NOT NULL DEFAULT false,
+    is_private BOOL     NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
-    is_deleted bool NOT NULL DEFAULT false,
-    is_blocked bool NOT NULL DEFAULT false,
-    is_primary bool NOT NULL DEFAULT false,
-    is_private bool NOT NULL DEFAULT false,
     CONSTRAINT fk_profile_images_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
-    );
+);
 
 -- CREATE TABLE IF NOT EXISTS profile_complaints (
 --                                                   id BIGSERIAL NOT NULL PRIMARY KEY,

@@ -1,6 +1,7 @@
 package com.tgdating.aggregation.dto.request;
 
 import lombok.Data;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -37,5 +38,5 @@ public class RequestProfileCreateDto {
     private Double distance;
     private Integer page;
     private Integer size;
-    private Byte[] image;
+    private MultipartFile[] image;
 }
