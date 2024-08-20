@@ -15,7 +15,7 @@ public class ProfileImageEntity {
     private Long size;
     private Boolean isDeleted;
     private Boolean isBlocked;
-    private Boolean isPremium;
+    private Boolean isPrimary;
     private Boolean isPrivate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

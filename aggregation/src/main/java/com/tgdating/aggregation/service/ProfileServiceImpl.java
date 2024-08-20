@@ -33,7 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private void uploadImages(RequestProfileCreateDto requestProfileCreateDto, Long profileId) {
         String sessionId = requestProfileCreateDto.getSessionId();
-        for (MultipartFile file : requestProfileCreateDto.getImage()) {
+        for (MultipartFile file: requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
             addImageToDB(profileId, imageConverterRecord);
         }
@@ -64,7 +64,7 @@ public class ProfileServiceImpl implements ProfileService {
         requestProfileImageAddDto.setSize(imageConverterRecord.size());
         requestProfileImageAddDto.setIsDeleted(false);
         requestProfileImageAddDto.setIsBlocked(false);
-        requestProfileImageAddDto.setIsPremium(false);
+        requestProfileImageAddDto.setIsPrimary(false);
         requestProfileImageAddDto.setIsPrivate(false);
         requestProfileImageAddDto.setCreatedAt(LocalDateTime.now());
         requestProfileImageAddDto.setUpdatedAt(null);

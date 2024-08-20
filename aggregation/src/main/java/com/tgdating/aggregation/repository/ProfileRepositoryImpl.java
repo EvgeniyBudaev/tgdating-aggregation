@@ -7,6 +7,8 @@ import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,18 +19,18 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     private static final String CREATE_PROFILE =
-            "INSERT INTO profiles (session_id, display_name, birthday, gender, location, description," +
-                    " height, weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible," +
-                    " created_at, updated_at, last_online)" +
-                    " VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height, :weight," +
-                    " :isDeleted, :isBlocked, :isPremium, :isShowDistance, :isInvisible, :createdAt, :updatedAt," +
-                    " :lastOnline)";
+            "INSERT INTO profiles (session_id, display_name, birthday, gender, location, description, height," +
+                    " weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible, created_at," +
+                    " updated_at, last_online)" +
+                    " VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height," +
+                    "  :weight, :isDeleted, :isBlocked, :isPremium, :isShowDistance, :isInvisible, :createdAt," +
+                    "  :updatedAt, :lastOnline)";
 
     private static final String ADD_PROFILE_IMAGE =
-            "INSERT INTO profile_images (profile_id, name, url, size, is_deleted, is_blocked, is_premium, is_private," +
+            "INSERT INTO profile_images (profile_id, name, url, size, is_deleted, is_blocked, is_primary, is_private," +
                     " created_at, updated_at)" +
-                    " VALUES (:profileId, :name, :url, :size, :isDeleted, :isBlocked, :isPremium, :isPrivate," +
-                    " :createdAt, :updatedAt)";
+                    " VALUES (:profileId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate," +
+                    " :createdAt, :updatedAt) RETURNING id";
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -87,10 +89,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         }
     }
 
+    @Transactional
     @Override
     public ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto) {
         try {
-            System.out.println("requestProfileImageAddDto: " + requestProfileImageAddDto);
             MapSqlParameterSource parameters = new MapSqlParameterSource()
                     .addValue("profileId", requestProfileImageAddDto.getProfileId())
                     .addValue("name", requestProfileImageAddDto.getName())
@@ -98,15 +100,15 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     .addValue("size", requestProfileImageAddDto.getSize())
                     .addValue("isDeleted", requestProfileImageAddDto.getIsDeleted())
                     .addValue("isBlocked", requestProfileImageAddDto.getIsBlocked())
-                    .addValue("isPremium", requestProfileImageAddDto.getIsPremium())
+                    .addValue("isPrimary", requestProfileImageAddDto.getIsPrimary())
                     .addValue("isPrivate", requestProfileImageAddDto.getIsPrivate())
                     .addValue("createdAt", requestProfileImageAddDto.getCreatedAt())
                     .addValue("updatedAt", requestProfileImageAddDto.getUpdatedAt());
-            System.out.println("parameters: " + parameters);
-            namedParameterJdbcTemplate.update(ADD_PROFILE_IMAGE, parameters);
-            System.out.println("UPDATED");
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            namedParameterJdbcTemplate.update(ADD_PROFILE_IMAGE, parameters, keyHolder);
+            long insertedId = keyHolder.getKey().longValue();
             return namedParameterJdbcTemplate.queryForObject(
-                    "SELECT * FROM profile_images WHERE profile_id = :profileId",
+                    "SELECT * FROM profile_images WHERE id = " + insertedId,
                     parameters,
                     (resultSet, i) -> ProfileImageEntity.builder()
                             .id(resultSet.getLong("id"))
@@ -116,7 +118,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                             .size(resultSet.getLong("size"))
                             .isDeleted(resultSet.getBoolean("is_deleted"))
                             .isBlocked(resultSet.getBoolean("is_blocked"))
-                            .isPremium(resultSet.getBoolean("is_premium"))
+                            .isPrimary(resultSet.getBoolean("is_primary"))
                             .isPrivate(resultSet.getBoolean("is_private"))
                             .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
                             .updatedAt(null)
