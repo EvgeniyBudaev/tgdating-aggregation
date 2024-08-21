@@ -1,10 +1,11 @@
 package com.tgdating.aggregation.dto.request;
 
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 public class RequestProfileCreateDto {
@@ -13,7 +14,8 @@ public class RequestProfileCreateDto {
     @NotNull
     private String displayName;
     @NotNull
-    private LocalDate birthday;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+    private LocalDateTime birthday;
     @NotNull
     private String gender;
     @NotNull
@@ -31,8 +33,8 @@ public class RequestProfileCreateDto {
     private Boolean telegramAllowsWriteToPm;
     private String telegramQueryId;
     private Long telegramChatId;
-    private String latitude;
-    private String longitude;
+    private Double latitude;
+    private Double longitude;
     private Byte ageFrom;
     private Byte ageTo;
     private Double distance;

@@ -2,9 +2,11 @@ package com.tgdating.aggregation.service;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
 import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
+import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
+import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.model.ImageConverterRecord;
-import com.tgdating.aggregation.model.ProfileEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
+import com.tgdating.aggregation.model.ProfileNavigatorEntity;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import com.tgdating.aggregation.shared.utils.ImageConverter;
@@ -25,13 +27,16 @@ public class ProfileServiceImpl implements ProfileService {
         this.profileRepository = profileRepository;
     }
 
-    public ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto) {
-        ProfileEntity profileEntity = profileRepository.create(requestProfileCreateDto);
-        uploadImages(requestProfileCreateDto, profileEntity.getId());
-        return profileEntity;
+    public ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto) {
+        profileRepository.create(requestProfileCreateDto);
+        addImages(requestProfileCreateDto);
+        addNavigator(requestProfileCreateDto);
+        ResponseProfileCreateDto responseProfileCreateDto = new ResponseProfileCreateDto();
+        responseProfileCreateDto.setSessionId(requestProfileCreateDto.getSessionId());
+        return responseProfileCreateDto;
     }
 
-    private void uploadImages(RequestProfileCreateDto requestProfileCreateDto, Long profileId) {
+    private void addImages(RequestProfileCreateDto requestProfileCreateDto) {
         String sessionId = requestProfileCreateDto.getSessionId();
         for (MultipartFile file : requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
@@ -69,5 +74,13 @@ public class ProfileServiceImpl implements ProfileService {
         requestProfileImageAddDto.setCreatedAt(LocalDateTime.now());
         requestProfileImageAddDto.setUpdatedAt(null);
         return profileRepository.addImage(requestProfileImageAddDto);
+    }
+
+    private ProfileNavigatorEntity addNavigator(RequestProfileCreateDto requestProfileCreateDto) {
+        RequestProfileNavigatorAddDto requestProfileNavigatorAddDto = new RequestProfileNavigatorAddDto();
+        requestProfileNavigatorAddDto.setSessionId(requestProfileCreateDto.getSessionId());
+        requestProfileNavigatorAddDto.setLatitude(requestProfileCreateDto.getLatitude());
+        requestProfileNavigatorAddDto.setLongitude(requestProfileCreateDto.getLongitude());
+        return profileRepository.addNavigator(requestProfileNavigatorAddDto);
     }
 }

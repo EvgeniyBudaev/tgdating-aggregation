@@ -1,8 +1,8 @@
 package com.tgdating.aggregation.service;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.model.ProfileEntity;
+import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 
 public interface ProfileService {
-    ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto);
+    ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto);
 }

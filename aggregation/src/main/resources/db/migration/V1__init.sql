@@ -7,29 +7,29 @@ CREATE TABLE IF NOT EXISTS profiles
     gender           VARCHAR(100),
     location         TEXT,
     description      TEXT,
-    height           REAL         NOT NULL DEFAULT 0 CHECK (height >= 0),
-    weight           REAL         NOT NULL DEFAULT 0 CHECK (weight >= 0),
+    height           REAL         NOT NULL DEFAULT 0.0 CHECK (height >= 0),
+    weight           REAL         NOT NULL DEFAULT 0.0 CHECK (weight >= 0),
     is_deleted       BOOL         NOT NULL DEFAULT false,
     is_blocked       BOOL         NOT NULL DEFAULT false,
     is_premium       BOOL         NOT NULL DEFAULT false,
-    is_show_distance BOOL         NOT NULL DEFAULT false,
+    is_show_distance BOOL         NOT NULL DEFAULT true,
     is_invisible     BOOL         NOT NULL DEFAULT false,
-    created_at       TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at       TIMESTAMP             DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP    NULL,
-    last_online      TIMESTAMP    NOT NULL CHECK (last_online >= created_at)
+    last_online      TIMESTAMP             DEFAULT CURRENT_TIMESTAMP CHECK (last_online >= created_at)
 );
 
 CREATE TABLE IF NOT EXISTS profile_images
 (
     id         BIGSERIAL NOT NULL PRIMARY KEY,
-    session_id VARCHAR    NOT NULL,
+    session_id VARCHAR   NOT NULL,
     name       VARCHAR(255),
     url        VARCHAR,
     size       BIGINT,
     is_deleted BOOL      NOT NULL DEFAULT false,
     is_blocked BOOL      NOT NULL DEFAULT false,
     is_primary BOOL      NOT NULL DEFAULT false,
-    is_private BOOL     NOT NULL DEFAULT false,
+    is_private BOOL      NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     CONSTRAINT fk_profile_images_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
@@ -60,13 +60,14 @@ CREATE TABLE IF NOT EXISTS profile_images
 -- );
 
 -- CREATE EXTENSION IF NOT EXISTS postgis;
---
--- CREATE TABLE IF NOT EXISTS profile_navigators (
---                                                   id BIGSERIAL NOT NULL PRIMARY KEY,
---                                                   profile_id BIGINT NOT NULL,
---                                                   location geometry(Point,  4326),
---                                                   CONSTRAINT fk_profile_navigators_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
--- );
+
+CREATE TABLE IF NOT EXISTS profile_navigators
+(
+    id         BIGSERIAL NOT NULL PRIMARY KEY,
+    session_id VARCHAR   NOT NULL,
+    location   geometry(Point, 4326),
+    CONSTRAINT fk_profile_navigators_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
+);
 
 -- CREATE TABLE IF NOT EXISTS profile_filters (
 --                                                id BIGSERIAL NOT NULL PRIMARY KEY,
