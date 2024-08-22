@@ -30,7 +30,8 @@ public class SecurityConfig {
             );
             web.ignoring().requestMatchers(
                     HttpMethod.GET,
-                    "/public/**"
+                    "/public/**",
+                    "/api/v1/profiles/**"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.DELETE,

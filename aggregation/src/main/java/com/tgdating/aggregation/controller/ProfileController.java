@@ -1,6 +1,7 @@
 package com.tgdating.aggregation.controller;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
+import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.service.ProfileService;
 import org.springframework.http.HttpStatus;
@@ -18,8 +19,13 @@ public class ProfileController {
     }
 
     @PostMapping
-    public ResponseEntity<ResponseProfileCreateDto> create(@ModelAttribute RequestProfileCreateDto requestProfileCreateDto) {
+    public ResponseEntity<ResponseProfileCreateDto> createProfile(@ModelAttribute RequestProfileCreateDto requestProfileCreateDto) {
         System.out.println("request: " + requestProfileCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileService.create(requestProfileCreateDto));
+    }
+
+    @GetMapping("/{sessionId}")
+    public ResponseEntity<ResponseProfileBySessionIdGetDto> getProfileBySessionID(@PathVariable String sessionId) {
+        return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId));
     }
 }

@@ -25,13 +25,16 @@ public class RequestProfileCreateDto {
     private Double height;
     private Double weight;
     private String lookingFor;
+    @NotNull
     private Long telegramUserId;
+    @NotNull
     private String telegramUsername;
     private String telegramFirstName;
     private String telegramLastName;
     private String telegramLanguageCode;
     private Boolean telegramAllowsWriteToPm;
     private String telegramQueryId;
+    @NotNull
     private Long telegramChatId;
     private Double latitude;
     private Double longitude;

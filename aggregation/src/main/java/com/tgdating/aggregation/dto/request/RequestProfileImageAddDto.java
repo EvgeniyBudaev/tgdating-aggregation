@@ -1,10 +1,12 @@
 package com.tgdating.aggregation.dto.request;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
+@Builder
 public class RequestProfileImageAddDto {
     private String sessionId;
     private String name;

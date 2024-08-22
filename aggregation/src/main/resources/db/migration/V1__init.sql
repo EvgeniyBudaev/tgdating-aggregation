@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS profile_images
 CREATE TABLE IF NOT EXISTS profile_telegram
 (
     id                 BIGSERIAL NOT NULL PRIMARY KEY,
-    session_id         VARCHAR   NOT NULL,
+    session_id         VARCHAR   NOT NULL UNIQUE,
     user_id            BIGINT NOT NULL UNIQUE,
     username           VARCHAR(255) NOT NULL UNIQUE,
     first_name         VARCHAR(255),
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS profile_telegram
     language_code      VARCHAR,
     allows_write_to_pm BOOL,
     query_id           TEXT,
-    chat_id            BIGINT,
+    chat_id            BIGINT NOT NULL,
     CONSTRAINT fk_profile_telegram_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
 );
 

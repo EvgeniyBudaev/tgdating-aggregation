@@ -50,6 +50,20 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     " :allowsWriteToPm, :queryId, :chatId)" +
                     " RETURNING id";
 
+    private static final String GET_PROFILE_BY_SESSION_ID =
+            "SELECT id, session_id, display_name, birthday, gender, location, description, height," +
+                    " weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible, created_at," +
+                    " updated_at, last_online" +
+                    " FROM profiles" +
+                    " WHERE session_id = :sessionId AND is_deleted = false";
+
+    private static final String GET_PROFILE_TELEGRAM_BY_SESSION_ID =
+            "SELECT id, session_id, user_id, username, first_name, last_name, language_code," +
+                    " allows_write_to_pm, query_id, chat_id" +
+                    " FROM profile_telegram" +
+                    " WHERE session_id = :sessionId";
+
+
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
@@ -149,6 +163,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         }
     }
 
+    @Transactional
     @Override
     public ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto) {
         try {
@@ -178,6 +193,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         }
     }
 
+    @Transactional
     @Override
     public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
         try {
@@ -214,6 +230,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         }
     }
 
+    @Transactional
     @Override
     public ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto) {
         try {
@@ -250,5 +267,74 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             throw new InternalServerException("Ошибка сервера", e.getMessage()
             );
         }
+    }
+
+    @Override
+    public ProfileEntity findBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_BY_SESSION_ID,
+                parameters,
+                (resultSet, i) -> ProfileEntity.builder()
+                        .id(resultSet.getLong("id"))
+                        .sessionId(resultSet.getString("session_id"))
+                        .displayName(resultSet.getString("display_name"))
+                        .birthday(resultSet.getTimestamp("birthday").toLocalDateTime().toLocalDate())
+                        .gender(resultSet.getString("gender"))
+                        .location(
+                                resultSet.getString("location") != null ?
+                                        resultSet.getString("location") : null
+                        )
+                        .description(
+                                resultSet.getString("description") != null ?
+                                        resultSet.getString("description") : null
+                        )
+                        .height(resultSet.getDouble("height"))
+                        .weight(resultSet.getDouble("weight"))
+                        .isDeleted(resultSet.getBoolean("is_deleted"))
+                        .isBlocked(resultSet.getBoolean("is_blocked"))
+                        .isPremium(resultSet.getBoolean("is_premium"))
+                        .isShowDistance(resultSet.getBoolean("is_show_distance"))
+                        .isInvisible(resultSet.getBoolean("is_invisible"))
+                        .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
+                        .updatedAt(
+                                resultSet.getTimestamp("updated_at") != null ?
+                                        resultSet.getTimestamp("updated_at").toLocalDateTime() : null
+                        )
+                        .lastOnline(resultSet.getTimestamp("last_online").toLocalDateTime())
+                        .build()
+        );
+    }
+
+    @Override
+    public ProfileTelegramEntity findTelegramBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_TELEGRAM_BY_SESSION_ID,
+                parameters,
+                (resultSet, i) -> ProfileTelegramEntity.builder()
+                        .id(resultSet.getLong("id"))
+                        .sessionId(resultSet.getString("session_id"))
+                        .userId(resultSet.getLong("user_id"))
+                        .username(resultSet.getString("username"))
+                        .firstName(
+                                resultSet.getString("first_name") != null ?
+                                        resultSet.getString("first_name") : null
+                        )
+                        .lastName(
+                                resultSet.getString("last_name") != null ?
+                                        resultSet.getString("last_name") : null
+                        )
+                        .languageCode(resultSet.getString("language_code"))
+                        .allowsWriteToPm(resultSet.getBoolean("allows_write_to_pm"))
+                        .queryId(
+                                resultSet.getString("query_id") != null ?
+                                        resultSet.getString("query_id") : null
+                        )
+                        .chatId(resultSet.getLong("chat_id"))
+                        .build()
+        );
     }
 }

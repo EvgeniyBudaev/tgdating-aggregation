@@ -11,5 +11,10 @@ public interface ProfileRepository {
     ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto);
 
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
+
     ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);
+
+    ProfileEntity findBySessionID(String sessionId);
+
+    ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 }

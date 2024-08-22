@@ -1,6 +1,7 @@
 package com.tgdating.aggregation.service;
 
 import com.tgdating.aggregation.dto.request.*;
+import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
@@ -29,9 +30,9 @@ public class ProfileServiceImpl implements ProfileService {
         addNavigator(requestProfileCreateDto);
         addFilter(requestProfileCreateDto);
         addTelegram(requestProfileCreateDto);
-        ResponseProfileCreateDto responseProfileCreateDto = new ResponseProfileCreateDto();
-        responseProfileCreateDto.setSessionId(requestProfileCreateDto.getSessionId());
-        return responseProfileCreateDto;
+        return ResponseProfileCreateDto.builder()
+                .sessionId(requestProfileCreateDto.getSessionId())
+                .build();
     }
 
     private void addImages(RequestProfileCreateDto requestProfileCreateDto) {
@@ -60,54 +61,93 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private ProfileImageEntity addImageToDB(String sessionId, ImageConverterRecord imageConverterRecord) {
-        RequestProfileImageAddDto requestProfileImageAddDto = new RequestProfileImageAddDto();
-        requestProfileImageAddDto.setSessionId(sessionId);
-        requestProfileImageAddDto.setName(imageConverterRecord.name());
-        requestProfileImageAddDto.setUrl(imageConverterRecord.url());
-        requestProfileImageAddDto.setSize(imageConverterRecord.size());
-        requestProfileImageAddDto.setIsDeleted(false);
-        requestProfileImageAddDto.setIsBlocked(false);
-        requestProfileImageAddDto.setIsPrimary(false);
-        requestProfileImageAddDto.setIsPrivate(false);
-        requestProfileImageAddDto.setCreatedAt(LocalDateTime.now());
-        requestProfileImageAddDto.setUpdatedAt(null);
-        return profileRepository.addImage(requestProfileImageAddDto);
+        return profileRepository.addImage(
+                RequestProfileImageAddDto.builder()
+                        .sessionId(sessionId)
+                        .name(imageConverterRecord.name())
+                        .url(imageConverterRecord.url())
+                        .size(imageConverterRecord.size())
+                        .isDeleted(false)
+                        .isBlocked(false)
+                        .isPrimary(false)
+                        .isPrivate(false)
+                        .createdAt(LocalDateTime.now())
+                        .updatedAt(null)
+                        .build()
+        );
     }
 
     private ProfileNavigatorEntity addNavigator(RequestProfileCreateDto requestProfileCreateDto) {
-        RequestProfileNavigatorAddDto requestProfileNavigatorAddDto = new RequestProfileNavigatorAddDto();
-        requestProfileNavigatorAddDto.setSessionId(requestProfileCreateDto.getSessionId());
-        requestProfileNavigatorAddDto.setLatitude(requestProfileCreateDto.getLatitude());
-        requestProfileNavigatorAddDto.setLongitude(requestProfileCreateDto.getLongitude());
-        return profileRepository.addNavigator(requestProfileNavigatorAddDto);
+        return profileRepository.addNavigator(
+                RequestProfileNavigatorAddDto.builder()
+                        .sessionId(requestProfileCreateDto.getSessionId())
+                        .latitude(requestProfileCreateDto.getLatitude())
+                        .longitude(requestProfileCreateDto.getLongitude())
+                        .build()
+        );
     }
 
     private ProfileFilterEntity addFilter(RequestProfileCreateDto requestProfileCreateDto) {
-        RequestProfileFilterAddDto requestProfileFilterAddDto = new RequestProfileFilterAddDto();
-        requestProfileFilterAddDto.setSessionId(requestProfileCreateDto.getSessionId());
-        requestProfileFilterAddDto.setSearchGender(requestProfileCreateDto.getSearchGender());
-        requestProfileFilterAddDto.setLookingFor(requestProfileCreateDto.getLookingFor());
-        requestProfileFilterAddDto.setAgeFrom(requestProfileCreateDto.getAgeFrom());
-        requestProfileFilterAddDto.setAgeTo(requestProfileCreateDto.getAgeTo());
-        requestProfileFilterAddDto.setDistance(requestProfileCreateDto.getDistance());
-        requestProfileFilterAddDto.setPage(requestProfileCreateDto.getPage());
-        requestProfileFilterAddDto.setSize(requestProfileCreateDto.getSize());
-        return profileRepository.addFilter(requestProfileFilterAddDto);
+        return profileRepository.addFilter(
+                RequestProfileFilterAddDto.builder()
+                        .sessionId(requestProfileCreateDto.getSessionId())
+                        .searchGender(requestProfileCreateDto.getSearchGender())
+                        .lookingFor(requestProfileCreateDto.getLookingFor())
+                        .ageFrom(requestProfileCreateDto.getAgeFrom())
+                        .ageTo(requestProfileCreateDto.getAgeTo())
+                        .distance(requestProfileCreateDto.getDistance())
+                        .page(requestProfileCreateDto.getPage())
+                        .size(requestProfileCreateDto.getSize())
+                        .build()
+        );
     }
 
     private ProfileTelegramEntity addTelegram(RequestProfileCreateDto requestProfileCreateDto) {
-        RequestProfileTelegramAddDto requestProfileTelegramAddDto = new RequestProfileTelegramAddDto();
-        requestProfileTelegramAddDto.setSessionId(requestProfileCreateDto.getSessionId());
-        requestProfileTelegramAddDto.setUserId(requestProfileCreateDto.getTelegramUserId());
-        requestProfileTelegramAddDto.setUsername(requestProfileCreateDto.getTelegramUsername());
-        requestProfileTelegramAddDto.setFirstName(requestProfileCreateDto.getTelegramFirstName());
-        requestProfileTelegramAddDto.setLastName(requestProfileCreateDto.getTelegramLastName());
-        requestProfileTelegramAddDto.setLanguageCode(requestProfileCreateDto.getTelegramLanguageCode());
-        requestProfileTelegramAddDto.setAllowsWriteToPm(requestProfileCreateDto.getTelegramAllowsWriteToPm());
-        requestProfileTelegramAddDto.setQueryId(requestProfileCreateDto.getTelegramQueryId());
-        requestProfileTelegramAddDto.setChatId(requestProfileCreateDto.getTelegramChatId());
-        ProfileTelegramEntity p = profileRepository.addTelegram(requestProfileTelegramAddDto);
-        System.out.println("Telegram: " + p);
-        return p;
+        return profileRepository.addTelegram(
+                RequestProfileTelegramAddDto.builder()
+                        .sessionId(requestProfileCreateDto.getSessionId())
+                        .userId(requestProfileCreateDto.getTelegramUserId())
+                        .username(requestProfileCreateDto.getTelegramUsername())
+                        .firstName(requestProfileCreateDto.getTelegramFirstName())
+                        .lastName(requestProfileCreateDto.getTelegramLastName())
+                        .languageCode(requestProfileCreateDto.getTelegramLanguageCode())
+                        .allowsWriteToPm(requestProfileCreateDto.getTelegramAllowsWriteToPm())
+                        .queryId(requestProfileCreateDto.getTelegramQueryId())
+                        .chatId(requestProfileCreateDto.getTelegramChatId())
+                        .build()
+        );
+    }
+
+    public ResponseProfileBySessionIdGetDto getBySessionID(String sessionId) {
+        ProfileEntity profileEntity = findBySessionID(sessionId);
+        ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
+        return ResponseProfileBySessionIdGetDto.builder()
+                .id(profileEntity.getId())
+                .sessionId(profileEntity.getSessionId())
+                .displayName(profileEntity.getDisplayName())
+                .birthday(profileEntity.getBirthday())
+                .gender(profileEntity.getGender())
+                .location(profileEntity.getLocation())
+                .description(profileEntity.getDescription())
+                .height(profileEntity.getHeight())
+                .weight(profileEntity.getWeight())
+                .isDeleted(profileEntity.getIsDeleted())
+                .isBlocked(profileEntity.getIsBlocked())
+                .isPremium(profileEntity.getIsPremium())
+                .isShowDistance(profileEntity.getIsShowDistance())
+                .isInvisible(profileEntity.getIsInvisible())
+                .createdAt(profileEntity.getCreatedAt())
+                .updatedAt(profileEntity.getUpdatedAt())
+                .lastOnline(profileEntity.getLastOnline())
+                .telegram(profileTelegramEntity)
+                .build();
+    }
+
+    public ProfileEntity findBySessionID(String sessionId) {
+        return profileRepository.findBySessionID(sessionId);
+    }
+
+    public ProfileTelegramEntity findTelegramBySessionID(String sessionId) {
+        return profileRepository.findTelegramBySessionID(sessionId);
     }
 }
