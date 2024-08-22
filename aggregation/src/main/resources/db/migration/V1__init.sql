@@ -69,19 +69,20 @@ CREATE TABLE IF NOT EXISTS profile_navigators
     CONSTRAINT fk_profile_navigators_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
 );
 
--- CREATE TABLE IF NOT EXISTS profile_filters (
---                                                id BIGSERIAL NOT NULL PRIMARY KEY,
---                                                profile_id BIGINT NOT NULL,
---                                                search_gender VARCHAR(100),
---                                                looking_for VARCHAR(100),
---                                                age_from INTEGER,
---                                                age_to INTEGER,
---                                                distance INTEGER,
---                                                page INTEGER,
---                                                size INTEGER,
---                                                CONSTRAINT fk_profile_filters_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
--- );
---
+CREATE TABLE IF NOT EXISTS profile_filters
+(
+    id            BIGSERIAL NOT NULL PRIMARY KEY,
+    session_id    VARCHAR   NOT NULL,
+    search_gender VARCHAR(100),
+    looking_for   VARCHAR(100),
+    age_from      INTEGER,
+    age_to        INTEGER,
+    distance      REAL,
+    page          INTEGER,
+    size          INTEGER,
+    CONSTRAINT fk_profile_filters_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
+);
+
 -- CREATE TABLE IF NOT EXISTS profile_reviews (
 --                                                id BIGSERIAL NOT NULL PRIMARY KEY,
 --                                                profile_id BIGINT NOT NULL,

@@ -1,10 +1,12 @@
 package com.tgdating.aggregation.service;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
+import com.tgdating.aggregation.dto.request.RequestProfileFilterAddDto;
 import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
 import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.model.ImageConverterRecord;
+import com.tgdating.aggregation.model.ProfileFilterEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.model.ProfileNavigatorEntity;
 import com.tgdating.aggregation.repository.ProfileRepository;
@@ -31,6 +33,7 @@ public class ProfileServiceImpl implements ProfileService {
         profileRepository.create(requestProfileCreateDto);
         addImages(requestProfileCreateDto);
         addNavigator(requestProfileCreateDto);
+        addFilter(requestProfileCreateDto);
         ResponseProfileCreateDto responseProfileCreateDto = new ResponseProfileCreateDto();
         responseProfileCreateDto.setSessionId(requestProfileCreateDto.getSessionId());
         return responseProfileCreateDto;
@@ -82,5 +85,21 @@ public class ProfileServiceImpl implements ProfileService {
         requestProfileNavigatorAddDto.setLatitude(requestProfileCreateDto.getLatitude());
         requestProfileNavigatorAddDto.setLongitude(requestProfileCreateDto.getLongitude());
         return profileRepository.addNavigator(requestProfileNavigatorAddDto);
+    }
+
+    private ProfileFilterEntity addFilter(RequestProfileCreateDto requestProfileCreateDto) {
+        RequestProfileFilterAddDto requestProfileFilterAddDto = new RequestProfileFilterAddDto();
+        requestProfileFilterAddDto.setSessionId(requestProfileCreateDto.getSessionId());
+        requestProfileFilterAddDto.setSearchGender(requestProfileCreateDto.getSearchGender());
+        requestProfileFilterAddDto.setLookingFor(requestProfileCreateDto.getLookingFor());
+        requestProfileFilterAddDto.setAgeFrom(requestProfileCreateDto.getAgeFrom());
+        requestProfileFilterAddDto.setAgeTo(requestProfileCreateDto.getAgeTo());
+        requestProfileFilterAddDto.setDistance(requestProfileCreateDto.getDistance());
+        requestProfileFilterAddDto.setPage(requestProfileCreateDto.getPage());
+        requestProfileFilterAddDto.setSize(requestProfileCreateDto.getSize());
+        ProfileFilterEntity p = profileRepository.addFilter(requestProfileFilterAddDto);
+        System.out.println("Filter: " + p);
+//        return profileRepository.addFilter(requestProfileFilterAddDto);
+        return p;
     }
 }

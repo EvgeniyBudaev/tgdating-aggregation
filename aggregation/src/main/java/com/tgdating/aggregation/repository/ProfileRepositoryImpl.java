@@ -1,12 +1,10 @@
 package com.tgdating.aggregation.repository;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
+import com.tgdating.aggregation.dto.request.RequestProfileFilterAddDto;
 import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
 import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
-import com.tgdating.aggregation.model.PointEntity;
-import com.tgdating.aggregation.model.ProfileEntity;
-import com.tgdating.aggregation.model.ProfileImageEntity;
-import com.tgdating.aggregation.model.ProfileNavigatorEntity;
+import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -41,6 +39,12 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     private static final String ADD_PROFILE_NAVIGATOR =
             "INSERT INTO profile_navigators (session_id, location)" +
                     " VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:latitude, :longitude),  4326)) RETURNING id";
+
+    private static final String ADD_PROFILE_FILTER =
+            "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page," +
+                    " size)" +
+                    " VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)" +
+                    " RETURNING id";
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -162,6 +166,42 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                                     .latitude(resultSet.getDouble("latitude"))
                                     .longitude(resultSet.getDouble("longitude"))
                                     .build())
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new InternalServerException("Ошибка сервера", e.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
+        try {
+            MapSqlParameterSource parameters = new MapSqlParameterSource()
+                    .addValue("sessionId", requestProfileFilterAddDto.getSessionId())
+                    .addValue("searchGender", requestProfileFilterAddDto.getSearchGender())
+                    .addValue("lookingFor", requestProfileFilterAddDto.getLookingFor())
+                    .addValue("ageFrom", requestProfileFilterAddDto.getAgeFrom())
+                    .addValue("ageTo", requestProfileFilterAddDto.getAgeTo())
+                    .addValue("distance", requestProfileFilterAddDto.getDistance())
+                    .addValue("page", requestProfileFilterAddDto.getPage())
+                    .addValue("size", requestProfileFilterAddDto.getSize());
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            namedParameterJdbcTemplate.update(ADD_PROFILE_FILTER, parameters, keyHolder);
+            long insertedId = keyHolder.getKey().longValue();
+            return namedParameterJdbcTemplate.queryForObject(
+                    "SELECT * FROM profile_filters WHERE id = " + insertedId,
+                    parameters,
+                    (resultSet, i) -> ProfileFilterEntity.builder()
+                            .id(resultSet.getLong("id"))
+                            .sessionId(resultSet.getString("session_id"))
+                            .searchGender(resultSet.getString("search_gender"))
+                            .lookingFor(resultSet.getString("looking_for"))
+                            .ageFrom(resultSet.getByte("age_from"))
+                            .ageTo(resultSet.getByte("age_to"))
+                            .distance(resultSet.getDouble("distance"))
+                            .page(resultSet.getInt("page"))
+                            .size(resultSet.getInt("size"))
                             .build()
             );
         } catch (Exception e) {
