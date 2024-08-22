@@ -2,6 +2,7 @@ package com.tgdating.aggregation.repository;
 
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.model.*;
+import com.tgdating.aggregation.repository.mapper.*;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -57,6 +58,11 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     " FROM profiles" +
                     " WHERE session_id = :sessionId AND is_deleted = false";
 
+    private static final String GET_PROFILE_NAVIGATOR_BY_SESSION_ID =
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude" +
+                    " FROM profile_navigators" +
+                    " WHERE session_id = :sessionId";
+
     private static final String GET_PROFILE_TELEGRAM_BY_SESSION_ID =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code," +
                     " allows_write_to_pm, query_id, chat_id" +
@@ -94,25 +100,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             return namedParameterJdbcTemplate.queryForObject(
                     "SELECT * FROM profiles WHERE session_id = :sessionId",
                     parameters,
-                    (resultSet, i) -> ProfileEntity.builder()
-                            .id(resultSet.getLong("id"))
-                            .sessionId(resultSet.getString("session_id"))
-                            .displayName(resultSet.getString("display_name"))
-                            .birthday(resultSet.getTimestamp("birthday").toLocalDateTime().toLocalDate())
-                            .gender(resultSet.getString("gender"))
-                            .location(resultSet.getString("location"))
-                            .description(resultSet.getString("description"))
-                            .height(resultSet.getDouble("height"))
-                            .weight(resultSet.getDouble("weight"))
-                            .isDeleted(resultSet.getBoolean("is_deleted"))
-                            .isBlocked(resultSet.getBoolean("is_blocked"))
-                            .isPremium(resultSet.getBoolean("is_premium"))
-                            .isShowDistance(resultSet.getBoolean("is_show_distance"))
-                            .isInvisible(resultSet.getBoolean("is_invisible"))
-                            .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(null)
-                            .lastOnline(resultSet.getTimestamp("last_online").toLocalDateTime())
-                            .build()
+                    new ProfileEntityRowMapper()
             );
         } catch (Exception e) {
             throw new InternalServerException(
@@ -143,19 +131,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             return namedParameterJdbcTemplate.queryForObject(
                     "SELECT * FROM profile_images WHERE id = " + insertedId,
                     parameters,
-                    (resultSet, i) -> ProfileImageEntity.builder()
-                            .id(resultSet.getLong("id"))
-                            .sessionId(resultSet.getString("session_id"))
-                            .name(resultSet.getString("name"))
-                            .url(resultSet.getString("url"))
-                            .size(resultSet.getLong("size"))
-                            .isDeleted(resultSet.getBoolean("is_deleted"))
-                            .isBlocked(resultSet.getBoolean("is_blocked"))
-                            .isPrimary(resultSet.getBoolean("is_primary"))
-                            .isPrivate(resultSet.getBoolean("is_private"))
-                            .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
-                            .updatedAt(null)
-                            .build()
+                    new ProfileImageEntityRowMapper()
             );
         } catch (Exception e) {
             throw new InternalServerException("Ошибка сервера", e.getMessage()
@@ -178,14 +154,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude" +
                             " FROM profile_navigators WHERE id = " + insertedId,
                     parameters,
-                    (resultSet, i) -> ProfileNavigatorEntity.builder()
-                            .id(resultSet.getLong("id"))
-                            .sessionId(resultSet.getString("session_id"))
-                            .location(PointEntity.builder()
-                                    .latitude(resultSet.getDouble("latitude"))
-                                    .longitude(resultSet.getDouble("longitude"))
-                                    .build())
-                            .build()
+                    new ProfileNavigatorEntityRowMapper()
             );
         } catch (Exception e) {
             throw new InternalServerException("Ошибка сервера", e.getMessage()
@@ -212,17 +181,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             return namedParameterJdbcTemplate.queryForObject(
                     "SELECT * FROM profile_filters WHERE id = " + insertedId,
                     parameters,
-                    (resultSet, i) -> ProfileFilterEntity.builder()
-                            .id(resultSet.getLong("id"))
-                            .sessionId(resultSet.getString("session_id"))
-                            .searchGender(resultSet.getString("search_gender"))
-                            .lookingFor(resultSet.getString("looking_for"))
-                            .ageFrom(resultSet.getByte("age_from"))
-                            .ageTo(resultSet.getByte("age_to"))
-                            .distance(resultSet.getDouble("distance"))
-                            .page(resultSet.getInt("page"))
-                            .size(resultSet.getInt("size"))
-                            .build()
+                    new ProfileFilterEntityRowMapper()
             );
         } catch (Exception e) {
             throw new InternalServerException("Ошибка сервера", e.getMessage()
@@ -250,18 +209,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             return namedParameterJdbcTemplate.queryForObject(
                     "SELECT * FROM profile_telegram WHERE id = " + insertedId,
                     parameters,
-                    (resultSet, i) -> ProfileTelegramEntity.builder()
-                            .id(resultSet.getLong("id"))
-                            .sessionId(resultSet.getString("session_id"))
-                            .userId(resultSet.getLong("user_id"))
-                            .username(resultSet.getString("username"))
-                            .firstName(resultSet.getString("first_name"))
-                            .lastName(resultSet.getString("last_name"))
-                            .languageCode(resultSet.getString("language_code"))
-                            .allowsWriteToPm(resultSet.getBoolean("allows_write_to_pm"))
-                            .queryId(resultSet.getString("query_id"))
-                            .chatId(resultSet.getLong("chat_id"))
-                            .build()
+                    new ProfileTelegramEntityRowMapper()
             );
         } catch (Exception e) {
             throw new InternalServerException("Ошибка сервера", e.getMessage()
@@ -276,34 +224,18 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         return namedParameterJdbcTemplate.queryForObject(
                 GET_PROFILE_BY_SESSION_ID,
                 parameters,
-                (resultSet, i) -> ProfileEntity.builder()
-                        .id(resultSet.getLong("id"))
-                        .sessionId(resultSet.getString("session_id"))
-                        .displayName(resultSet.getString("display_name"))
-                        .birthday(resultSet.getTimestamp("birthday").toLocalDateTime().toLocalDate())
-                        .gender(resultSet.getString("gender"))
-                        .location(
-                                resultSet.getString("location") != null ?
-                                        resultSet.getString("location") : null
-                        )
-                        .description(
-                                resultSet.getString("description") != null ?
-                                        resultSet.getString("description") : null
-                        )
-                        .height(resultSet.getDouble("height"))
-                        .weight(resultSet.getDouble("weight"))
-                        .isDeleted(resultSet.getBoolean("is_deleted"))
-                        .isBlocked(resultSet.getBoolean("is_blocked"))
-                        .isPremium(resultSet.getBoolean("is_premium"))
-                        .isShowDistance(resultSet.getBoolean("is_show_distance"))
-                        .isInvisible(resultSet.getBoolean("is_invisible"))
-                        .createdAt(resultSet.getTimestamp("created_at").toLocalDateTime())
-                        .updatedAt(
-                                resultSet.getTimestamp("updated_at") != null ?
-                                        resultSet.getTimestamp("updated_at").toLocalDateTime() : null
-                        )
-                        .lastOnline(resultSet.getTimestamp("last_online").toLocalDateTime())
-                        .build()
+                new ProfileEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_NAVIGATOR_BY_SESSION_ID,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
         );
     }
 
@@ -314,27 +246,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         return namedParameterJdbcTemplate.queryForObject(
                 GET_PROFILE_TELEGRAM_BY_SESSION_ID,
                 parameters,
-                (resultSet, i) -> ProfileTelegramEntity.builder()
-                        .id(resultSet.getLong("id"))
-                        .sessionId(resultSet.getString("session_id"))
-                        .userId(resultSet.getLong("user_id"))
-                        .username(resultSet.getString("username"))
-                        .firstName(
-                                resultSet.getString("first_name") != null ?
-                                        resultSet.getString("first_name") : null
-                        )
-                        .lastName(
-                                resultSet.getString("last_name") != null ?
-                                        resultSet.getString("last_name") : null
-                        )
-                        .languageCode(resultSet.getString("language_code"))
-                        .allowsWriteToPm(resultSet.getBoolean("allows_write_to_pm"))
-                        .queryId(
-                                resultSet.getString("query_id") != null ?
-                                        resultSet.getString("query_id") : null
-                        )
-                        .chatId(resultSet.getLong("chat_id"))
-                        .build()
+                new ProfileTelegramEntityRowMapper()
         );
     }
 }

@@ -26,6 +26,7 @@ public class ProfileController {
 
     @GetMapping("/{sessionId}")
     public ResponseEntity<ResponseProfileBySessionIdGetDto> getProfileBySessionID(@PathVariable String sessionId) {
+        System.out.println("getProfileBySessionID: " + sessionId);
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId));
     }
 }

@@ -120,6 +120,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     public ResponseProfileBySessionIdGetDto getBySessionID(String sessionId) {
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
         return ResponseProfileBySessionIdGetDto.builder()
                 .id(profileEntity.getId())
@@ -139,15 +140,20 @@ public class ProfileServiceImpl implements ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .lastOnline(profileEntity.getLastOnline())
+                .navigator(profileNavigatorEntity)
                 .telegram(profileTelegramEntity)
                 .build();
     }
 
-    public ProfileEntity findBySessionID(String sessionId) {
+    private ProfileEntity findBySessionID(String sessionId) {
         return profileRepository.findBySessionID(sessionId);
     }
 
-    public ProfileTelegramEntity findTelegramBySessionID(String sessionId) {
+    private ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
+        return profileRepository.findNavigatorBySessionID(sessionId);
+    }
+
+    private ProfileTelegramEntity findTelegramBySessionID(String sessionId) {
         return profileRepository.findTelegramBySessionID(sessionId);
     }
 }

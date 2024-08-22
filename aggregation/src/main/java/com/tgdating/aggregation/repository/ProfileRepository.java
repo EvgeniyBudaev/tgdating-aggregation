@@ -16,5 +16,7 @@ public interface ProfileRepository {
 
     ProfileEntity findBySessionID(String sessionId);
 
+    ProfileNavigatorEntity findNavigatorBySessionID(String sessionId);
+
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 }
