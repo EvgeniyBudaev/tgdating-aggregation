@@ -7,5 +7,5 @@ import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 public interface ProfileService {
     ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto);
 
-    ResponseProfileBySessionIdGetDto getBySessionID(String sessionId);
+    ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude);
 }

@@ -20,13 +20,17 @@ public class ProfileController {
 
     @PostMapping
     public ResponseEntity<ResponseProfileCreateDto> createProfile(@ModelAttribute RequestProfileCreateDto requestProfileCreateDto) {
-        System.out.println("request: " + requestProfileCreateDto);
+        System.out.println("controller createProfile: " + requestProfileCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileService.create(requestProfileCreateDto));
     }
 
     @GetMapping("/{sessionId}")
-    public ResponseEntity<ResponseProfileBySessionIdGetDto> getProfileBySessionID(@PathVariable String sessionId) {
-        System.out.println("getProfileBySessionID: " + sessionId);
-        return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId));
+    public ResponseEntity<ResponseProfileBySessionIdGetDto> getProfileBySessionID(
+            @PathVariable String sessionId,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude
+    ) {
+        System.out.println("controller getProfileBySessionID sessionId: " + sessionId);
+        return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId, latitude, longitude));
     }
 }

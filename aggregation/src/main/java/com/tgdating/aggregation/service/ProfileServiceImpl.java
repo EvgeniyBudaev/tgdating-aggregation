@@ -7,13 +7,14 @@ import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import com.tgdating.aggregation.shared.utils.ImageConverter;
+import com.tgdating.aggregation.shared.utils.Utils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
@@ -33,6 +34,10 @@ public class ProfileServiceImpl implements ProfileService {
         return ResponseProfileCreateDto.builder()
                 .sessionId(requestProfileCreateDto.getSessionId())
                 .build();
+    }
+
+    private void updateLastOnline(String sessionId) {
+        profileRepository.updateLastOnline(sessionId);
     }
 
     private void addImages(RequestProfileCreateDto requestProfileCreateDto) {
@@ -71,7 +76,7 @@ public class ProfileServiceImpl implements ProfileService {
                         .isBlocked(false)
                         .isPrimary(false)
                         .isPrivate(false)
-                        .createdAt(LocalDateTime.now())
+                        .createdAt(Utils.getNowUtc())
                         .updatedAt(null)
                         .build()
         );
@@ -85,6 +90,18 @@ public class ProfileServiceImpl implements ProfileService {
                         .longitude(requestProfileCreateDto.getLongitude())
                         .build()
         );
+    }
+
+    private void updateNavigator(String sessionId, Double latitude, Double longitude) {
+        if (latitude != null && longitude != null) {
+            profileRepository.updateNavigator(
+                    RequestProfileNavigatorAddDto.builder()
+                            .sessionId(sessionId)
+                            .latitude(latitude)
+                            .longitude(longitude)
+                            .build()
+            );
+        }
     }
 
     private ProfileFilterEntity addFilter(RequestProfileCreateDto requestProfileCreateDto) {
@@ -118,9 +135,13 @@ public class ProfileServiceImpl implements ProfileService {
         );
     }
 
-    public ResponseProfileBySessionIdGetDto getBySessionID(String sessionId) {
+    public ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude) {
+        updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
+        ProfileFilterEntity profileFilterEntity = findFilterBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
         return ResponseProfileBySessionIdGetDto.builder()
                 .id(profileEntity.getId())
@@ -140,7 +161,9 @@ public class ProfileServiceImpl implements ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .lastOnline(profileEntity.getLastOnline())
+                .images(profileImageListEntity)
                 .navigator(profileNavigatorEntity)
+                .filter(profileFilterEntity)
                 .telegram(profileTelegramEntity)
                 .build();
     }
@@ -149,8 +172,16 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.findBySessionID(sessionId);
     }
 
+    private List<ProfileImageEntity> findImageListBySessionID(String sessionId) {
+        return profileRepository.findImageListBySessionID(sessionId);
+    }
+
     private ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
         return profileRepository.findNavigatorBySessionID(sessionId);
+    }
+
+    private ProfileFilterEntity findFilterBySessionID(String sessionId) {
+        return profileRepository.findFilterBySessionID(sessionId);
     }
 
     private ProfileTelegramEntity findTelegramBySessionID(String sessionId) {

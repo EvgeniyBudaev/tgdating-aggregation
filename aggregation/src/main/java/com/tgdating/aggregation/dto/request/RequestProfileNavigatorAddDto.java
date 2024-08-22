@@ -7,7 +7,6 @@ import lombok.Data;
 @Builder
 public class RequestProfileNavigatorAddDto {
     private String sessionId;
-    private String name;
     private Double latitude;
     private Double longitude;
 }
