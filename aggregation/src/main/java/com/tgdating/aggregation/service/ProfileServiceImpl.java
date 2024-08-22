@@ -1,14 +1,8 @@
 package com.tgdating.aggregation.service;
 
-import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileFilterAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
+import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
-import com.tgdating.aggregation.model.ImageConverterRecord;
-import com.tgdating.aggregation.model.ProfileFilterEntity;
-import com.tgdating.aggregation.model.ProfileImageEntity;
-import com.tgdating.aggregation.model.ProfileNavigatorEntity;
+import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import com.tgdating.aggregation.shared.utils.ImageConverter;
@@ -34,6 +28,7 @@ public class ProfileServiceImpl implements ProfileService {
         addImages(requestProfileCreateDto);
         addNavigator(requestProfileCreateDto);
         addFilter(requestProfileCreateDto);
+        addTelegram(requestProfileCreateDto);
         ResponseProfileCreateDto responseProfileCreateDto = new ResponseProfileCreateDto();
         responseProfileCreateDto.setSessionId(requestProfileCreateDto.getSessionId());
         return responseProfileCreateDto;
@@ -97,9 +92,22 @@ public class ProfileServiceImpl implements ProfileService {
         requestProfileFilterAddDto.setDistance(requestProfileCreateDto.getDistance());
         requestProfileFilterAddDto.setPage(requestProfileCreateDto.getPage());
         requestProfileFilterAddDto.setSize(requestProfileCreateDto.getSize());
-        ProfileFilterEntity p = profileRepository.addFilter(requestProfileFilterAddDto);
-        System.out.println("Filter: " + p);
-//        return profileRepository.addFilter(requestProfileFilterAddDto);
+        return profileRepository.addFilter(requestProfileFilterAddDto);
+    }
+
+    private ProfileTelegramEntity addTelegram(RequestProfileCreateDto requestProfileCreateDto) {
+        RequestProfileTelegramAddDto requestProfileTelegramAddDto = new RequestProfileTelegramAddDto();
+        requestProfileTelegramAddDto.setSessionId(requestProfileCreateDto.getSessionId());
+        requestProfileTelegramAddDto.setUserId(requestProfileCreateDto.getTelegramUserId());
+        requestProfileTelegramAddDto.setUsername(requestProfileCreateDto.getTelegramUsername());
+        requestProfileTelegramAddDto.setFirstName(requestProfileCreateDto.getTelegramFirstName());
+        requestProfileTelegramAddDto.setLastName(requestProfileCreateDto.getTelegramLastName());
+        requestProfileTelegramAddDto.setLanguageCode(requestProfileCreateDto.getTelegramLanguageCode());
+        requestProfileTelegramAddDto.setAllowsWriteToPm(requestProfileCreateDto.getTelegramAllowsWriteToPm());
+        requestProfileTelegramAddDto.setQueryId(requestProfileCreateDto.getTelegramQueryId());
+        requestProfileTelegramAddDto.setChatId(requestProfileCreateDto.getTelegramChatId());
+        ProfileTelegramEntity p = profileRepository.addTelegram(requestProfileTelegramAddDto);
+        System.out.println("Telegram: " + p);
         return p;
     }
 }

@@ -25,10 +25,10 @@ public class RequestProfileCreateDto {
     private Double height;
     private Double weight;
     private String lookingFor;
-    private String telegramId;
+    private Long telegramUserId;
+    private String telegramUsername;
     private String telegramFirstName;
     private String telegramLastName;
-    private String telegramUsername;
     private String telegramLanguageCode;
     private Boolean telegramAllowsWriteToPm;
     private String telegramQueryId;

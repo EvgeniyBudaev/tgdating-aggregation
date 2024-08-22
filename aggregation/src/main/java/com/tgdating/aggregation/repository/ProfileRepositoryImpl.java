@@ -1,9 +1,6 @@
 package com.tgdating.aggregation.repository;
 
-import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileFilterAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
+import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -44,6 +41,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page," +
                     " size)" +
                     " VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)" +
+                    " RETURNING id";
+
+    private static final String ADD_PROFILE_TELEGRAM =
+            "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code," +
+                    " allows_write_to_pm, query_id, chat_id)" +
+                    " VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode," +
+                    " :allowsWriteToPm, :queryId, :chatId)" +
                     " RETURNING id";
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -202,6 +206,44 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                             .distance(resultSet.getDouble("distance"))
                             .page(resultSet.getInt("page"))
                             .size(resultSet.getInt("size"))
+                            .build()
+            );
+        } catch (Exception e) {
+            throw new InternalServerException("Ошибка сервера", e.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto) {
+        try {
+            MapSqlParameterSource parameters = new MapSqlParameterSource()
+                    .addValue("sessionId", requestProfileTelegramAddDto.getSessionId())
+                    .addValue("userId", requestProfileTelegramAddDto.getUserId())
+                    .addValue("username", requestProfileTelegramAddDto.getUsername())
+                    .addValue("firstName", requestProfileTelegramAddDto.getFirstName())
+                    .addValue("lastName", requestProfileTelegramAddDto.getLastName())
+                    .addValue("languageCode", requestProfileTelegramAddDto.getLanguageCode())
+                    .addValue("allowsWriteToPm", requestProfileTelegramAddDto.getAllowsWriteToPm())
+                    .addValue("queryId", requestProfileTelegramAddDto.getQueryId())
+                    .addValue("chatId", requestProfileTelegramAddDto.getChatId());
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            namedParameterJdbcTemplate.update(ADD_PROFILE_TELEGRAM, parameters, keyHolder);
+            long insertedId = keyHolder.getKey().longValue();
+            return namedParameterJdbcTemplate.queryForObject(
+                    "SELECT * FROM profile_telegram WHERE id = " + insertedId,
+                    parameters,
+                    (resultSet, i) -> ProfileTelegramEntity.builder()
+                            .id(resultSet.getLong("id"))
+                            .sessionId(resultSet.getString("session_id"))
+                            .userId(resultSet.getLong("user_id"))
+                            .username(resultSet.getString("username"))
+                            .firstName(resultSet.getString("first_name"))
+                            .lastName(resultSet.getString("last_name"))
+                            .languageCode(resultSet.getString("language_code"))
+                            .allowsWriteToPm(resultSet.getBoolean("allows_write_to_pm"))
+                            .queryId(resultSet.getString("query_id"))
+                            .chatId(resultSet.getLong("chat_id"))
                             .build()
             );
         } catch (Exception e) {

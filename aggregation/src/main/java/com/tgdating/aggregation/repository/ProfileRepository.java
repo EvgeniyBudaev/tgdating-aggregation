@@ -1,13 +1,7 @@
 package com.tgdating.aggregation.repository;
 
-import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileFilterAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileImageAddDto;
-import com.tgdating.aggregation.dto.request.RequestProfileNavigatorAddDto;
-import com.tgdating.aggregation.model.ProfileEntity;
-import com.tgdating.aggregation.model.ProfileFilterEntity;
-import com.tgdating.aggregation.model.ProfileImageEntity;
-import com.tgdating.aggregation.model.ProfileNavigatorEntity;
+import com.tgdating.aggregation.dto.request.*;
+import com.tgdating.aggregation.model.*;
 
 public interface ProfileRepository {
     ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto);
@@ -17,4 +11,5 @@ public interface ProfileRepository {
     ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto);
 
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
+    ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);
 }

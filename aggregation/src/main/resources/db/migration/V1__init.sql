@@ -45,19 +45,20 @@ CREATE TABLE IF NOT EXISTS profile_images
 --                                                   CONSTRAINT fk_profile_complaints_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
 -- );
 --
--- CREATE TABLE IF NOT EXISTS profile_telegram (
---                                                 id BIGSERIAL NOT NULL PRIMARY KEY,
---                                                 profile_id BIGINT,
---                                                 telegram_id BIGINT,
---                                                 username VARCHAR(255),
---                                                 first_name VARCHAR(255),
---                                                 last_name VARCHAR(255),
---                                                 language_code VARCHAR,
---                                                 allows_write_to_pm BOOL,
---                                                 query_id TEXT,
---                                                 chat_id BIGINT,
---                                                 CONSTRAINT fk_profile_telegram_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
--- );
+CREATE TABLE IF NOT EXISTS profile_telegram
+(
+    id                 BIGSERIAL NOT NULL PRIMARY KEY,
+    session_id         VARCHAR   NOT NULL,
+    user_id            BIGINT NOT NULL UNIQUE,
+    username           VARCHAR(255) NOT NULL UNIQUE,
+    first_name         VARCHAR(255),
+    last_name          VARCHAR(255),
+    language_code      VARCHAR,
+    allows_write_to_pm BOOL,
+    query_id           TEXT,
+    chat_id            BIGINT,
+    CONSTRAINT fk_profile_telegram_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
+);
 
 -- CREATE EXTENSION IF NOT EXISTS postgis;
 
