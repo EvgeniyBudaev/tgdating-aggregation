@@ -1,6 +1,7 @@
 package com.tgdating.aggregation.repository;
 
 import com.tgdating.aggregation.dto.request.*;
+import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.mapper.*;
 import com.tgdating.aggregation.shared.utils.Utils;
@@ -55,6 +56,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     " VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode," +
                     " :allowsWriteToPm, :queryId, :chatId)" +
                     " RETURNING id";
+
+    private static final String GET_PROFILE_LIST_BY_SESSION_ID =
+            "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height," +
+                    " p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible," +
+                    "  p.created_at, p.updated_at, p.last_online" +
+                    " FROM profiles p" +
+                    " WHERE session_id = :sessionId";
 
     private static final String GET_PROFILE_BY_SESSION_ID =
             "SELECT id, session_id, display_name, birthday, gender, location, description, height," +
@@ -222,6 +230,17 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 "SELECT * FROM profile_telegram WHERE id = " + insertedId,
                 parameters,
                 new ProfileTelegramEntityRowMapper()
+        );
+    }
+
+    @Override
+    public List<ResponseProfileListGetDto> findProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileListGetDto.getSessionId());
+        return namedParameterJdbcTemplate.query(
+                GET_PROFILE_LIST_BY_SESSION_ID,
+                parameters,
+                new ProfileListEntityRowMapper()
         );
     }
 

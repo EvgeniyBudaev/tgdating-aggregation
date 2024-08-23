@@ -26,12 +26,14 @@ public class SecurityConfig {
                     HttpMethod.POST,
                     "/public/**",
                     "/api/v1/users",
-                    "/api/v1/profiles"
+                    "/api/v1/profiles",
+                    "/**"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.GET,
                     "/public/**",
-                    "/api/v1/profiles/**"
+                    "/api/v1/profiles/**",
+                    "/**"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.DELETE,

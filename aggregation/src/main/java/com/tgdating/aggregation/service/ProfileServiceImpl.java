@@ -3,6 +3,7 @@ package com.tgdating.aggregation.service;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
+import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
@@ -36,6 +37,10 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
+    public List<ResponseProfileListGetDto> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+        return profileRepository.findProfileList(requestProfileListGetDto);
+    }
+
     private void updateLastOnline(String sessionId) {
         profileRepository.updateLastOnline(sessionId);
     }
@@ -50,7 +55,7 @@ public class ProfileServiceImpl implements ProfileService {
 
     private ImageConverterRecord uploadImageToFileSystem(MultipartFile file, String sessionId) {
         try {
-            Path staticFolderPath = BASE_PROJECT_PATH.resolve("src/main/resources/static");
+            Path staticFolderPath = BASE_PROJECT_PATH.resolve("src/main/resources/static/images");
             String fileName = file.getOriginalFilename();
             String filePath = String.format("%s/%s/%s", staticFolderPath, sessionId, fileName);
             File directory = new File(filePath).getParentFile();
@@ -166,6 +171,12 @@ public class ProfileServiceImpl implements ProfileService {
                 .filter(profileFilterEntity)
                 .telegram(profileTelegramEntity)
                 .build();
+    }
+
+    public ProfileFilterEntity getFilterBySessionID(String sessionId, Double latitude, Double longitude) {
+        updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
+        return profileRepository.findFilterBySessionID(sessionId);
     }
 
     private ProfileEntity findBySessionID(String sessionId) {
