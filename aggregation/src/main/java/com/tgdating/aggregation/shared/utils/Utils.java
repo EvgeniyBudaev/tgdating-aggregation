@@ -16,4 +16,11 @@ public class Utils {
         // Из ZonedDateTime извлекаем LocalDateTime
         return zonedDateTime.toLocalDateTime();
     }
+
+    public static boolean calculateIsOnline(LocalDateTime lastOnline) {
+        Instant now = Instant.now(); // Текущее время в формате Instant
+        Instant lastOnlineInstant = lastOnline.toInstant(ZoneOffset.UTC); // Преобразование LocalDateTime в Instant
+        long diffInMinutes = Math.abs(now.toEpochMilli() / 60000L - lastOnlineInstant.toEpochMilli() / 60000L); // Расчет разницы в минутах
+        return diffInMinutes < 5; // Если разница меньше 5 минут, считается пользователь онлайн
+    }
 }

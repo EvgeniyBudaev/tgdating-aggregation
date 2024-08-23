@@ -38,8 +38,8 @@ public class RequestProfileCreateDto {
     private Long telegramChatId;
     private Double latitude;
     private Double longitude;
-    private Byte ageFrom;
-    private Byte ageTo;
+    private Integer ageFrom;
+    private Integer ageTo;
     private Double distance;
     private Integer page;
     private Integer size;

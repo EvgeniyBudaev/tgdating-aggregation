@@ -9,8 +9,8 @@ public class RequestProfileFilterAddDto {
     private String sessionId;
     private String searchGender;
     private String lookingFor;
-    private Byte ageFrom;
-    private Byte ageTo;
+    private Integer ageFrom;
+    private Integer ageTo;
     private Double distance;
     private Integer page;
     private Integer size;

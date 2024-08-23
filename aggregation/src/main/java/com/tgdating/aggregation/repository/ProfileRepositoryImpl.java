@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -60,9 +61,23 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     private static final String GET_PROFILE_LIST_BY_SESSION_ID =
             "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height," +
                     " p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible," +
-                    "  p.created_at, p.updated_at, p.last_online" +
-                    " FROM profiles p" +
-                    " WHERE session_id = :sessionId";
+                    "  p.created_at, p.updated_at, p.last_online," +
+                    " ST_Distance(" +
+                        "(SELECT location FROM profile_navigators WHERE session_id = p.session_id)::geography, " +
+                    " ST_SetSRID(ST_Force2D(ST_MakePoint(" +
+                                      "(SELECT ST_X(location) FROM profile_navigators WHERE session_id = :sessionId)," +
+                                      " (SELECT ST_Y(location) FROM profile_navigators WHERE session_id = :sessionId)" +
+                    ")), 4326)::geography) AS distance" +
+            " FROM profiles p" +
+            " JOIN profile_navigators pn ON p.session_id = pn.session_id" +
+            " WHERE p.is_deleted = false AND  p.is_blocked = false AND" +
+                    " (p.birthday BETWEEN :birthdateTo AND :birthdateFrom) AND" +
+                    " (:searchGender = 'all' OR gender = :searchGender) AND  p.session_id <> :sessionId AND" +
+                    " NOT EXISTS (SELECT 1 FROM profile_blocks WHERE session_id = :sessionId AND blocked_user_session_id = p.session_id) AND" +
+                    " ST_Distance((SELECT location FROM profile_navigators WHERE session_id = p.session_id)::geography, " +
+                    " ST_SetSRID(ST_MakePoint((SELECT ST_X(location) FROM profile_navigators WHERE session_id = :sessionId), " +
+                    " (SELECT ST_Y(location) FROM profile_navigators WHERE session_id = :sessionId)), 4326)::geography) <= :distanceMeters" +
+            " ORDER BY distance ASC, p.last_online DESC";
 
     private static final String GET_PROFILE_BY_SESSION_ID =
             "SELECT id, session_id, display_name, birthday, gender, location, description, height," +
@@ -75,7 +90,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private," +
                     " created_at, updated_at" +
                     " FROM profile_images" +
-                    " WHERE session_id = :sessionId";
+                    " WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false";
+
+    private static final String GET_PROFILE_IMAGE_PUBLIC_LIST_BY_SESSION_ID =
+            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private," +
+                    " created_at, updated_at" +
+                    " FROM profile_images" +
+                    " WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
 
     private static final String GET_PROFILE_NAVIGATOR_BY_SESSION_ID =
             "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude" +
@@ -234,9 +255,20 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public List<ResponseProfileListGetDto> findProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+    public List<ProfileListEntity> findProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+        LocalDate now = LocalDate.now();
+        int ageFrom = requestProfileListGetDto.getAgeFrom();
+        int ageTo = requestProfileListGetDto.getAgeTo();
+        int yearFrom = now.getYear() - ageFrom;
+        int yearTo = now.getYear() - ageTo;
+        LocalDate birthdateFrom = LocalDate.of(yearFrom, 1, 1);
+        LocalDate birthdateTo = LocalDate.of(yearTo, 1, 1);
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileListGetDto.getSessionId());
+                .addValue("sessionId", requestProfileListGetDto.getSessionId())
+                .addValue("searchGender", requestProfileListGetDto.getSearchGender())
+                .addValue("birthdateFrom", birthdateFrom)
+                .addValue("birthdateTo", birthdateTo)
+                .addValue("distanceMeters", requestProfileListGetDto.getDistance() * 1000);
         return namedParameterJdbcTemplate.query(
                 GET_PROFILE_LIST_BY_SESSION_ID,
                 parameters,
@@ -261,6 +293,17 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("sessionId", sessionId);
         return namedParameterJdbcTemplate.query(
                 GET_PROFILE_IMAGE_LIST_BY_SESSION_ID,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.query(
+                GET_PROFILE_IMAGE_PUBLIC_LIST_BY_SESSION_ID,
                 parameters,
                 new ProfileImageEntityRowMapper()
         );

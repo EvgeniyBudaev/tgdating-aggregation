@@ -15,12 +15,15 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private static final Path BASE_PROJECT_PATH = Paths.get(System.getProperty("user.dir"));
+    private static final Integer MIN_DISTANCE = 50;
 
     public ProfileServiceImpl(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
@@ -38,7 +41,26 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     public List<ResponseProfileListGetDto> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
-        return profileRepository.findProfileList(requestProfileListGetDto);
+        String sessionId = requestProfileListGetDto.getSessionId();
+        updateLastOnline(sessionId);
+        List<ProfileListEntity> profileListEntity = profileRepository.findProfileList(requestProfileListGetDto);
+        return profileListEntity.stream().map(item -> {
+            String itemSessionId = item.getSessionId();
+            List<ProfileImageEntity> profileImagePublicListEntity = findImagePublicListBySessionID(itemSessionId);
+            ProfileImageEntity lastImage = profileImagePublicListEntity.stream()
+                    .filter(image -> image.getSessionId().equals(itemSessionId))
+                    .max(Comparator.comparing(ProfileImageEntity::getCreatedAt))
+                    .orElse(null);
+            boolean isOnline = Utils.calculateIsOnline(item.getLastOnline());
+            double distanceValue = item.getDistance();
+            Integer distanceAsInt = (int) Math.floor(distanceValue < MIN_DISTANCE ? MIN_DISTANCE : distanceValue);
+            return ResponseProfileListGetDto.builder()
+                    .sessionId(itemSessionId)
+                    .distance(distanceAsInt)
+                    .url(lastImage != null ? lastImage.getUrl() : null)
+                    .isOnline(isOnline)
+                    .build();
+        }).collect(Collectors.toList());
     }
 
     private void updateLastOnline(String sessionId) {
@@ -49,6 +71,7 @@ public class ProfileServiceImpl implements ProfileService {
         String sessionId = requestProfileCreateDto.getSessionId();
         for (MultipartFile file : requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
+            System.out.println("imageConverterRecord : " + imageConverterRecord );
             addImageToDB(sessionId, imageConverterRecord);
         }
     }
@@ -185,6 +208,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     private List<ProfileImageEntity> findImageListBySessionID(String sessionId) {
         return profileRepository.findImageListBySessionID(sessionId);
+    }
+
+    private List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId) {
+        return profileRepository.findImagePublicListBySessionID(sessionId);
     }
 
     private ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {

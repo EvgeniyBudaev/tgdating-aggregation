@@ -14,8 +14,8 @@ public class ProfileFilterEntityRowMapper implements RowMapper<ProfileFilterEnti
                 rs.getString("session_id"),
                 rs.getString("search_gender"),
                 rs.getString("looking_for"),
-                rs.getByte("age_from"),
-                rs.getByte("age_to"),
+                rs.getInt("age_from"),
+                rs.getInt("age_to"),
                 rs.getDouble("distance"),
                 rs.getInt("page"),
                 rs.getInt("size")

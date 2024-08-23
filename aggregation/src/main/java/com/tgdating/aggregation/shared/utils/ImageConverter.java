@@ -15,11 +15,12 @@ public class ImageConverter {
         try {
             BufferedImage image = ImageIO.read(new File(inputPath));
             String outputPath = replaceExtension(inputPath);
+            String outputUrl = replaceExtension(fileName);
             ImageIO.write(image, "webp", new File(outputPath));
             deleteFile(inputPath);
             Path outputPathAsPath = Paths.get(outputPath);
             Long sizeInBytes = Files.size(outputPathAsPath);
-            return new ImageConverterRecord(fileName, outputPath, sizeInBytes);
+            return new ImageConverterRecord(outputUrl, outputUrl, sizeInBytes);
         } catch (Exception e) {
             throw new InternalServerException(
                     "Ошибка конвертации файла",
@@ -30,7 +31,8 @@ public class ImageConverter {
 
     private static String replaceExtension(String path) {
         String pathWithoutExtension = path.substring(0, path.lastIndexOf('.'));
-        return pathWithoutExtension + ".webp";
+        String extension = ".webp";
+        return pathWithoutExtension + extension;
     }
 
     private static void deleteFile(String path) {
