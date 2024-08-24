@@ -30,21 +30,22 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     public ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto) {
-        profileRepository.create(requestProfileCreateDto);
+        ProfileEntity profileEntity = profileRepository.create(requestProfileCreateDto);
         addImages(requestProfileCreateDto);
         addNavigator(requestProfileCreateDto);
         addFilter(requestProfileCreateDto);
         addTelegram(requestProfileCreateDto);
         return ResponseProfileCreateDto.builder()
-                .sessionId(requestProfileCreateDto.getSessionId())
+                .sessionId(profileEntity.getSessionId())
                 .build();
     }
 
-    public List<ResponseProfileListGetDto> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+    public PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
         String sessionId = requestProfileListGetDto.getSessionId();
         updateLastOnline(sessionId);
-        List<ProfileListEntity> profileListEntity = profileRepository.findProfileList(requestProfileListGetDto);
-        return profileListEntity.stream().map(item -> {
+        PaginationEntity<List<ProfileListEntity>> paginationProfileListEntity = profileRepository.findProfileList(requestProfileListGetDto);
+        List<ProfileListEntity> profileListEntity = paginationProfileListEntity.getContent();
+        List<ResponseProfileListGetDto> formattedList = profileListEntity.stream().map(item -> {
             String itemSessionId = item.getSessionId();
             List<ProfileImageEntity> profileImagePublicListEntity = findImagePublicListBySessionID(itemSessionId);
             ProfileImageEntity lastImage = profileImagePublicListEntity.stream()
@@ -59,8 +60,18 @@ public class ProfileServiceImpl implements ProfileService {
                     .distance(distanceAsInt)
                     .url(lastImage != null ? lastImage.getUrl() : null)
                     .isOnline(isOnline)
+                    .lastOnline(item.getLastOnline())
                     .build();
         }).collect(Collectors.toList());
+        return PaginationEntity.<List<ResponseProfileListGetDto>>builder()
+                .hasNext(paginationProfileListEntity.getHasNext())
+                .hasPrevious(paginationProfileListEntity.getHasPrevious())
+                .page(paginationProfileListEntity.getPage())
+                .size(paginationProfileListEntity.getSize())
+                .numberEntities(paginationProfileListEntity.getNumberEntities())
+                .totalPages(paginationProfileListEntity.getTotalPages())
+                .content(formattedList)
+                .build();
     }
 
     private void updateLastOnline(String sessionId) {
@@ -71,7 +82,6 @@ public class ProfileServiceImpl implements ProfileService {
         String sessionId = requestProfileCreateDto.getSessionId();
         for (MultipartFile file : requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
-            System.out.println("imageConverterRecord : " + imageConverterRecord );
             addImageToDB(sessionId, imageConverterRecord);
         }
     }

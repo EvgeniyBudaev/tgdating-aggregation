@@ -5,6 +5,7 @@ import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
+import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileFilterEntity;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.List;
 public interface ProfileService {
     ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto);
 
-    List<ResponseProfileListGetDto> getProfileList(RequestProfileListGetDto requestProfileListGetDto);
+    PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
     ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude);
 

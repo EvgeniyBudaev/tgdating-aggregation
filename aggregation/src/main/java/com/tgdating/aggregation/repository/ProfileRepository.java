@@ -20,7 +20,7 @@ public interface ProfileRepository {
 
     ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);
 
-    List<ProfileListEntity> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
+    PaginationEntity<List<ProfileListEntity>> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
     ProfileEntity findBySessionID(String sessionId);
 

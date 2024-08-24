@@ -14,4 +14,6 @@ public class RequestProfileListGetDto {
     private Double distance;
     private Double latitude;
     private Double longitude;
+    private Integer page;
+    private Integer size;
 }

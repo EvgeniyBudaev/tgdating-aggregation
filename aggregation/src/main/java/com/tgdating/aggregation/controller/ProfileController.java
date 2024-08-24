@@ -5,8 +5,10 @@ import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
+import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileFilterEntity;
 import com.tgdating.aggregation.service.ProfileService;
+import com.tgdating.aggregation.shared.Constants;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,11 +37,28 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.CREATED).body(profileService.create(requestProfileCreateDto));
     }
 
-    @PostMapping("/list")
-    public ResponseEntity<List<ResponseProfileListGetDto>> getProfileList(
-            @RequestBody RequestProfileListGetDto requestProfileListGetDto
+    @GetMapping("/list")
+    public ResponseEntity<PaginationEntity<List<ResponseProfileListGetDto>>> getProfileList(
+            @RequestParam String sessionId,
+            @RequestParam(defaultValue = Constants.DEFAULT_SEARCH_GENDER) String searchGender,
+            @RequestParam(defaultValue = Constants.DEFAULT_LOOKING_FOR) String lookingFor,
+            @RequestParam(defaultValue = Constants.DEFAULT_AGE_FROM) Integer ageFrom,
+            @RequestParam(defaultValue = Constants.DEFAULT_AGE_TO) Integer ageTo,
+            @RequestParam(defaultValue = Constants.DEFAULT_DISTANCE) Double distance,
+            @RequestParam(defaultValue = Constants.DEFAULT_PAGE) Integer page,
+            @RequestParam(defaultValue = Constants.DEFAULT_PAGE_SIZE) Integer size
     ) {
-        System.out.println("controller getProfileList sessionId: " + requestProfileListGetDto.getSessionId());
+        System.out.println("controller getProfileList sessionId: " + sessionId);
+        RequestProfileListGetDto requestProfileListGetDto = RequestProfileListGetDto.builder()
+                .sessionId(sessionId)
+                .searchGender(searchGender)
+                .lookingFor(lookingFor)
+                .ageFrom(ageFrom)
+                .ageTo(ageTo)
+                .distance(distance)
+                .page(page)
+                .size(size)
+                .build();
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfileList(requestProfileListGetDto));
     }
 
@@ -64,7 +83,7 @@ public class ProfileController {
                 .body(profileService.getFilterBySessionID(sessionId, latitude, longitude));
     }
 
-    @GetMapping(value = "/{sessionId}/image/{fileName}", produces = "image/webp")
+    @GetMapping(value = "/{sessionId}/images/{fileName}", produces = "image/webp")
     public byte[] getImageBySessionID(@PathVariable String sessionId, @PathVariable String fileName) throws IOException {
         Path staticFolderPath = BASE_PROJECT_PATH.resolve("src/main/resources/static/images");
         String filePath = String.format("%s/%s/%s", staticFolderPath, sessionId, fileName);
