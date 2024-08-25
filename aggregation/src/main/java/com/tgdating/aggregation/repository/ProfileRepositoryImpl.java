@@ -41,6 +41,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)\n"
                     + "WHERE session_id = :sessionId";
 
+    private static final String GET_PROFILE_NAVIGATOR =
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
+                    + "FROM profile_navigators WHERE session_id = :sessionId";
+
     private static final String ADD_PROFILE_FILTER =
             "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
                     + "size)"
@@ -187,10 +191,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     @Transactional
     @Override
     public ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto) {
+        String sessionId = requestProfileNavigatorAddDto.getSessionId();
+        Double latitude = requestProfileNavigatorAddDto.getLatitude();
+        Double longitude = requestProfileNavigatorAddDto.getLongitude();
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileNavigatorAddDto.getSessionId())
-                .addValue("latitude", requestProfileNavigatorAddDto.getLatitude())
-                .addValue("longitude", requestProfileNavigatorAddDto.getLongitude());
+                .addValue("sessionId", sessionId)
+                .addValue("latitude", latitude) // широта
+                .addValue("longitude", longitude); // долгота
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_PROFILE_NAVIGATOR, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
@@ -203,14 +210,22 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public void updateNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto) {
+    public ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
+        String sessionId = requestProfileNavigatorUpdateDto.getSessionId();
+        Double latitude = requestProfileNavigatorUpdateDto.getLatitude();
+        Double longitude = requestProfileNavigatorUpdateDto.getLongitude();
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileNavigatorAddDto.getSessionId())
-                .addValue("latitude", requestProfileNavigatorAddDto.getLatitude())
-                .addValue("longitude", requestProfileNavigatorAddDto.getLongitude());
+                .addValue("sessionId", sessionId)
+                .addValue("latitude", latitude) // широта
+                .addValue("longitude", longitude); // долгота
         namedParameterJdbcTemplate.update(
                 UPDATE_PROFILE_NAVIGATOR,
                 parameters
+        );
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_NAVIGATOR,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
         );
     }
 

@@ -44,7 +44,8 @@ public class SecurityConfig {
                     HttpMethod.PUT,
                     "/public/**",
                     "/api/v1/users/{id}/send-verification-email",
-                    "/api/v1/users/forgot-password"
+                    "/api/v1/users/forgot-password",
+                    "/**"
 
             );
             web.ignoring().requestMatchers(

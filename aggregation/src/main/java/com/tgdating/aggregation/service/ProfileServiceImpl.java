@@ -4,6 +4,7 @@ import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
+import com.tgdating.aggregation.dto.response.ResponseProfileNavigatorDto;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
@@ -130,16 +131,29 @@ public class ProfileServiceImpl implements ProfileService {
         );
     }
 
-    private void updateNavigator(String sessionId, Double latitude, Double longitude) {
+    public ResponseProfileNavigatorDto updateCoordinates(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
+        String sessionId = requestProfileNavigatorUpdateDto.getSessionId();
+        Double latitude = requestProfileNavigatorUpdateDto.getLatitude();
+        Double longitude = requestProfileNavigatorUpdateDto.getLongitude();
+        return ResponseProfileNavigatorDto.builder()
+                .sessionId(updateNavigator(sessionId, latitude, longitude).getSessionId())
+                .location(updateNavigator(requestProfileNavigatorUpdateDto.getSessionId(),
+                        requestProfileNavigatorUpdateDto.getLatitude(),
+                        requestProfileNavigatorUpdateDto.getLongitude()).getLocation())
+                .build();
+    }
+
+    private ProfileNavigatorEntity updateNavigator(String sessionId, Double latitude, Double longitude) {
         if (latitude != null && longitude != null) {
-            profileRepository.updateNavigator(
-                    RequestProfileNavigatorAddDto.builder()
+            return profileRepository.updateNavigator(
+                    RequestProfileNavigatorUpdateDto.builder()
                             .sessionId(sessionId)
                             .latitude(latitude)
                             .longitude(longitude)
                             .build()
             );
         }
+        return null;
     }
 
     private ProfileFilterEntity addFilter(RequestProfileCreateDto requestProfileCreateDto) {

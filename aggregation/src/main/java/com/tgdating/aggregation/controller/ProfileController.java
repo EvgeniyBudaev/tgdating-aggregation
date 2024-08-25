@@ -2,9 +2,11 @@ package com.tgdating.aggregation.controller;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
 import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
+import com.tgdating.aggregation.dto.request.RequestProfileNavigatorUpdateDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
 import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
+import com.tgdating.aggregation.dto.response.ResponseProfileNavigatorDto;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileFilterEntity;
 import com.tgdating.aggregation.service.ProfileService;
@@ -89,5 +91,14 @@ public class ProfileController {
         String filePath = String.format("%s/%s/%s", staticFolderPath, sessionId, fileName);
         System.out.println("getImage filePath: " + filePath);
         return Files.readAllBytes(Paths.get(filePath));
+    }
+
+    @PutMapping("/navigators")
+    public ResponseEntity<ResponseProfileNavigatorDto> updateCoordinates(
+            @RequestBody RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto
+    ) {
+        System.out.println("controller updateNavigator sessionId: " + requestProfileNavigatorUpdateDto.getSessionId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(profileService.updateCoordinates(requestProfileNavigatorUpdateDto));
     }
 }

@@ -14,7 +14,7 @@ public interface ProfileRepository {
 
     ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto);
 
-    void updateNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto);
+    ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto);
 
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
 
