@@ -1,10 +1,7 @@
 package com.tgdating.aggregation.service;
 
 import com.tgdating.aggregation.dto.request.*;
-import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileNavigatorDto;
+import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
@@ -43,7 +40,10 @@ public class ProfileServiceImpl implements ProfileService {
 
     public PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
         String sessionId = requestProfileListGetDto.getSessionId();
+        Double latitude = requestProfileListGetDto.getLatitude();
+        Double longitude = requestProfileListGetDto.getLongitude();
         updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
         PaginationEntity<List<ProfileListEntity>> paginationProfileListEntity = profileRepository.findProfileList(requestProfileListGetDto);
         List<ProfileListEntity> profileListEntity = paginationProfileListEntity.getContent();
         List<ResponseProfileListGetDto> formattedList = profileListEntity.stream().map(item -> {
@@ -220,10 +220,34 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
-    public ProfileFilterEntity getFilterBySessionID(String sessionId, Double latitude, Double longitude) {
+    public ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude) {
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);
-        return profileRepository.findFilterBySessionID(sessionId);
+        ProfileFilterEntity profileFilterEntity = profileRepository.findFilterBySessionID(sessionId);
+        return getResponseProfileFilterDto(profileFilterEntity);
+    }
+
+    public ResponseProfileFilterDto updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto) {
+        String sessionId = requestProfileFilterUpdateDto.getSessionId();
+        Double latitude = requestProfileFilterUpdateDto.getLatitude();
+        Double longitude = requestProfileFilterUpdateDto.getLongitude();
+        updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
+        ProfileFilterEntity profileFilterEntity = profileRepository.updateFilter(requestProfileFilterUpdateDto);
+        return getResponseProfileFilterDto(profileFilterEntity);
+    }
+
+    private ResponseProfileFilterDto getResponseProfileFilterDto(ProfileFilterEntity profileFilterEntity) {
+        ResponseProfileFilterDto responseProfileFilterDto = new ResponseProfileFilterDto();
+        responseProfileFilterDto.setSessionId(profileFilterEntity.getSessionId());
+        responseProfileFilterDto.setSearchGender(profileFilterEntity.getSearchGender());
+        responseProfileFilterDto.setLookingFor(profileFilterEntity.getLookingFor());
+        responseProfileFilterDto.setAgeFrom(profileFilterEntity.getAgeFrom());
+        responseProfileFilterDto.setAgeTo(profileFilterEntity.getAgeTo());
+        responseProfileFilterDto.setDistance(profileFilterEntity.getDistance());
+        responseProfileFilterDto.setPage(profileFilterEntity.getPage());
+        responseProfileFilterDto.setSize(profileFilterEntity.getSize());
+        return responseProfileFilterDto;
     }
 
     private ProfileEntity findBySessionID(String sessionId) {

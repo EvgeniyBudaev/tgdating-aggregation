@@ -1,11 +1,15 @@
-package com.tgdating.aggregation.dto.request;
+package com.tgdating.aggregation.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 @Builder
-public class RequestProfileListGetDto {
+public class ResponseProfileFilterDto {
     private String sessionId;
     private String searchGender;
     private String lookingFor;
@@ -14,6 +18,4 @@ public class RequestProfileListGetDto {
     private Double distance;
     private Integer page;
     private Integer size;
-    private Double latitude;
-    private Double longitude;
 }

@@ -1,12 +1,10 @@
 package com.tgdating.aggregation.controller;
 
 import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
+import com.tgdating.aggregation.dto.request.RequestProfileFilterUpdateDto;
 import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
 import com.tgdating.aggregation.dto.request.RequestProfileNavigatorUpdateDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileBySessionIdGetDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileCreateDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileListGetDto;
-import com.tgdating.aggregation.dto.response.ResponseProfileNavigatorDto;
+import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileFilterEntity;
 import com.tgdating.aggregation.service.ProfileService;
@@ -48,7 +46,9 @@ public class ProfileController {
             @RequestParam(defaultValue = Constants.DEFAULT_AGE_TO) Integer ageTo,
             @RequestParam(defaultValue = Constants.DEFAULT_DISTANCE) Double distance,
             @RequestParam(defaultValue = Constants.DEFAULT_PAGE) Integer page,
-            @RequestParam(defaultValue = Constants.DEFAULT_PAGE_SIZE) Integer size
+            @RequestParam(defaultValue = Constants.DEFAULT_PAGE_SIZE) Integer size,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude
     ) {
         System.out.println("controller getProfileList sessionId: " + sessionId);
         RequestProfileListGetDto requestProfileListGetDto = RequestProfileListGetDto.builder()
@@ -60,6 +60,8 @@ public class ProfileController {
                 .distance(distance)
                 .page(page)
                 .size(size)
+                .latitude(latitude)
+                .longitude(longitude)
                 .build();
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfileList(requestProfileListGetDto));
     }
@@ -75,7 +77,7 @@ public class ProfileController {
     }
 
     @GetMapping("/{sessionId}/filter")
-    public ResponseEntity<ProfileFilterEntity> getFilterBySessionID(
+    public ResponseEntity<ResponseProfileFilterDto> getFilterBySessionID(
             @PathVariable String sessionId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude
@@ -100,5 +102,14 @@ public class ProfileController {
         System.out.println("controller updateNavigator sessionId: " + requestProfileNavigatorUpdateDto.getSessionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.updateCoordinates(requestProfileNavigatorUpdateDto));
+    }
+
+    @PutMapping("/filters")
+    public ResponseEntity<ResponseProfileFilterDto> updateFilter(
+            @RequestBody RequestProfileFilterUpdateDto requestProfileFilterUpdateDto
+    ) {
+        System.out.println("controller updateFilter sessionId: " + requestProfileFilterUpdateDto.getSessionId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(profileService.updateFilter(requestProfileFilterUpdateDto));
     }
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RequestProfileListGetDto {
+public class RequestProfileFilterUpdateDto {
     private String sessionId;
     private String searchGender;
     private String lookingFor;

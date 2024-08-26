@@ -51,6 +51,17 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)\n"
                     + "RETURNING id";
 
+    private static final String UPDATE_PROFILE_FILTER =
+            "UPDATE profile_filters\n"
+                    + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
+                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size\n"
+                    + "WHERE session_id = :sessionId";
+
+    private static final String GET_PROFILE_FILTER =
+            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size\n"
+                    + "FROM profile_filters\n"
+                    + "WHERE session_id = :sessionId";
+
     private static final String ADD_PROFILE_TELEGRAM =
             "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code,\n"
                     + "allows_write_to_pm, query_id, chat_id)\n"
@@ -106,16 +117,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "created_at, updated_at\n"
                     + "FROM profile_images\n"
                     + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
-
-    private static final String GET_PROFILE_NAVIGATOR_BY_SESSION_ID =
-            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
-                    + "FROM profile_navigators\n"
-                    + "WHERE session_id = :sessionId";
-
-    private static final String GET_PROFILE_FILTER_BY_SESSION_ID =
-            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size\n"
-                    + "FROM profile_filters\n"
-                    + "WHERE session_id = :sessionId";
 
     private static final String GET_PROFILE_TELEGRAM_BY_SESSION_ID =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
@@ -229,6 +230,17 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         );
     }
 
+    @Override
+    public ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_NAVIGATOR,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
+        );
+    }
+
     @Transactional
     @Override
     public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
@@ -246,6 +258,36 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_filters WHERE id = " + insertedId,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileFilterUpdateDto.getSessionId())
+                .addValue("searchGender", requestProfileFilterUpdateDto.getSearchGender())
+                .addValue("lookingFor", requestProfileFilterUpdateDto.getLookingFor())
+                .addValue("ageFrom", requestProfileFilterUpdateDto.getAgeFrom())
+                .addValue("ageTo", requestProfileFilterUpdateDto.getAgeTo())
+                .addValue("distance", requestProfileFilterUpdateDto.getDistance())
+                .addValue("page", requestProfileFilterUpdateDto.getPage())
+                .addValue("size", requestProfileFilterUpdateDto.getSize());
+        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FILTER, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_FILTER,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileFilterEntity findFilterBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_FILTER,
                 parameters,
                 new ProfileFilterEntityRowMapper()
         );
@@ -336,28 +378,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 GET_PROFILE_IMAGE_PUBLIC_LIST_BY_SESSION_ID,
                 parameters,
                 new ProfileImageEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_NAVIGATOR_BY_SESSION_ID,
-                parameters,
-                new ProfileNavigatorEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileFilterEntity findFilterBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_FILTER_BY_SESSION_ID,
-                parameters,
-                new ProfileFilterEntityRowMapper()
         );
     }
 
