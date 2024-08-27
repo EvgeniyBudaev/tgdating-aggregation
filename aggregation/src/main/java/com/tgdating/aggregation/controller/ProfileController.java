@@ -1,9 +1,6 @@
 package com.tgdating.aggregation.controller;
 
-import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileFilterUpdateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
-import com.tgdating.aggregation.dto.request.RequestProfileNavigatorUpdateDto;
+import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileFilterEntity;
@@ -76,6 +73,29 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId, latitude, longitude));
     }
 
+    @GetMapping("/{sessionId}/detail")
+    public ResponseEntity<ResponseProfileDetailGetDto> getProfileDetail(
+            @PathVariable String sessionId,
+            @RequestParam String viewerSessionId,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude
+    ) {
+        System.out.println("controller getProfileBySessionID sessionId: " + sessionId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(profileService.getProfileDetail(sessionId, viewerSessionId, latitude, longitude));
+    }
+
+    @GetMapping("/{sessionId}/short")
+    public ResponseEntity<ResponseProfileShortInfoGetDto> getProfileShortInfo(
+            @PathVariable String sessionId,
+            @RequestParam(required = false) Double latitude,
+            @RequestParam(required = false) Double longitude
+    ) {
+        System.out.println("controller getProfileShortInfo sessionId: " + sessionId);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(profileService.getProfileShortInfo(sessionId, latitude, longitude));
+    }
+
     @GetMapping("/{sessionId}/filter")
     public ResponseEntity<ResponseProfileFilterDto> getFilterBySessionID(
             @PathVariable String sessionId,
@@ -111,5 +131,14 @@ public class ProfileController {
         System.out.println("controller updateFilter sessionId: " + requestProfileFilterUpdateDto.getSessionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.updateFilter(requestProfileFilterUpdateDto));
+    }
+
+    @PostMapping("/likes")
+    public ResponseEntity<ResponseProfileLikeDto> addLike(
+            @RequestBody RequestProfileLikeAddDto requestProfileLikeAddDto
+    ) {
+        System.out.println("controller addLike sessionId: " + requestProfileLikeAddDto.getSessionId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(profileService.addLike(requestProfileLikeAddDto));
     }
 }

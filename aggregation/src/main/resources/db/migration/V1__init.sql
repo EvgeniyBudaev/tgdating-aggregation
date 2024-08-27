@@ -95,16 +95,17 @@ CREATE TABLE IF NOT EXISTS profile_filters
 --                                                updated_at TIMESTAMP NULL CHECK (updated_at >= created_at),
 --                                                CONSTRAINT fk_profile_reviews_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
 -- );
---
--- CREATE TABLE IF NOT EXISTS profile_likes (
---                                              id BIGSERIAL NOT NULL PRIMARY KEY,
---                                              profile_id BIGINT NOT NULL,
---                                              likedUser_id BIGINT NOT NULL,
---                                              is_liked BOOL NOT NULL DEFAULT false,
---                                              created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---                                              updated_at TIMESTAMP NULL CHECK (updated_at >= created_at),
---                                              CONSTRAINT fk_profile_likes_profile_id FOREIGN KEY (profile_id) REFERENCES profiles (id)
--- );
+
+CREATE TABLE IF NOT EXISTS profile_likes
+(
+    id               BIGSERIAL NOT NULL PRIMARY KEY,
+    session_id       VARCHAR   NOT NULL,
+    liked_session_id BIGINT    NOT NULL,
+    is_liked         BOOL      NOT NULL DEFAULT false,
+    created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at       TIMESTAMP NULL,
+    CONSTRAINT fk_profile_likes_profile_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
+);
 
 CREATE TABLE IF NOT EXISTS profile_blocks
 (

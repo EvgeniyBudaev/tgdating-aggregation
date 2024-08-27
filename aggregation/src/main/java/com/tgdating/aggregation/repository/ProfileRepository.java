@@ -8,6 +8,10 @@ import java.util.List;
 public interface ProfileRepository {
     ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto);
 
+    PaginationEntity<List<ProfileListEntity>> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
+
+    ProfileEntity findBySessionID(String sessionId);
+
     void updateLastOnline(String sessionId);
 
     ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto);
@@ -26,13 +30,11 @@ public interface ProfileRepository {
 
     ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);
 
-    PaginationEntity<List<ProfileListEntity>> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
-
-    ProfileEntity findBySessionID(String sessionId);
-
     List<ProfileImageEntity> findImageListBySessionID(String sessionId);
 
     List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId);
 
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
+
+    ProfileLikeEntity addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
 }

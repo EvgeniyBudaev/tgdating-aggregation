@@ -1,9 +1,6 @@
 package com.tgdating.aggregation.service;
 
-import com.tgdating.aggregation.dto.request.RequestProfileCreateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileFilterUpdateDto;
-import com.tgdating.aggregation.dto.request.RequestProfileListGetDto;
-import com.tgdating.aggregation.dto.request.RequestProfileNavigatorUpdateDto;
+import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 
@@ -16,9 +13,16 @@ public interface ProfileService {
 
     ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude);
 
+    ResponseProfileDetailGetDto getProfileDetail(
+            String sessionId, String viewerSessionId, Double latitude, Double longitude);
+
+    ResponseProfileShortInfoGetDto getProfileShortInfo(String sessionId, Double latitude, Double longitude);
+
     ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude);
 
     ResponseProfileFilterDto updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto);
 
     ResponseProfileNavigatorDto updateCoordinates(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto);
+
+    ResponseProfileLikeDto addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
 }

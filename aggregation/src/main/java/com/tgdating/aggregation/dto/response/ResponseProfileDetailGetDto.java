@@ -10,7 +10,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class ResponseProfileBySessionIdGetDto {
+public class ResponseProfileDetailGetDto {
     private String sessionId;
     private String displayName;
     private LocalDate birthday;
@@ -29,7 +29,5 @@ public class ResponseProfileBySessionIdGetDto {
     private LocalDateTime updatedAt;
     private LocalDateTime lastOnline;
     private List<ProfileImageEntity> images;
-    private ResponseProfileNavigatorDto navigator;
-    private ResponseProfileFilterDto filter;
     private ResponseProfileTelegramDto telegram;
 }

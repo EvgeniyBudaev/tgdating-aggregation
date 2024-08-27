@@ -23,52 +23,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height,\n"
                     + ":weight, :createdAt, :lastOnline)";
 
-    private static final String UPDATE_LAST_ONLINE =
-            "UPDATE profiles SET last_online = :lastOnline WHERE session_id = :sessionId";
-
-    private static final String ADD_PROFILE_IMAGE =
-            "INSERT INTO profile_images (session_id, name, url, size, is_deleted, is_blocked, is_primary,\n"
-                    + "is_private, created_at, updated_at)\n"
-                    + "VALUES (:sessionId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate,\n"
-                    + ":createdAt, :updatedAt) RETURNING id";
-
-    private static final String ADD_PROFILE_NAVIGATOR =
-            "INSERT INTO profile_navigators (session_id, location)\n"
-                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:latitude, :longitude),  4326)) RETURNING id";
-
-    private static final String UPDATE_PROFILE_NAVIGATOR =
-            "UPDATE profile_navigators\n"
-                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)\n"
-                    + "WHERE session_id = :sessionId";
-
-    private static final String GET_PROFILE_NAVIGATOR =
-            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
-                    + "FROM profile_navigators WHERE session_id = :sessionId";
-
-    private static final String ADD_PROFILE_FILTER =
-            "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
-                    + "size)"
-                    + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)\n"
-                    + "RETURNING id";
-
-    private static final String UPDATE_PROFILE_FILTER =
-            "UPDATE profile_filters\n"
-                    + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
-                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size\n"
-                    + "WHERE session_id = :sessionId";
-
-    private static final String GET_PROFILE_FILTER =
-            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size\n"
-                    + "FROM profile_filters\n"
-                    + "WHERE session_id = :sessionId";
-
-    private static final String ADD_PROFILE_TELEGRAM =
-            "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code,\n"
-                    + "allows_write_to_pm, query_id, chat_id)\n"
-                    + "VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode,\n"
-                    + ":allowsWriteToPm, :queryId, :chatId)\n"
-                    + "RETURNING id";
-
     private static final String GET_PROFILE_LIST_BY_SESSION_ID =
             "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height,\n"
                     + "p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible,\n"
@@ -106,23 +60,74 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "FROM profiles\n"
                     + "WHERE session_id = :sessionId AND is_deleted = false";
 
-    private static final String GET_PROFILE_IMAGE_LIST_BY_SESSION_ID =
+    private static final String UPDATE_LAST_ONLINE =
+            "UPDATE profiles SET last_online = :lastOnline WHERE session_id = :sessionId";
+
+    private static final String ADD_IMAGE =
+            "INSERT INTO profile_images (session_id, name, url, size, is_deleted, is_blocked, is_primary,\n"
+                    + "is_private, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate,\n"
+                    + ":createdAt, :updatedAt) RETURNING id";
+
+    private static final String ADD_NAVIGATOR =
+            "INSERT INTO profile_navigators (session_id, location)\n"
+                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326)) RETURNING id";
+
+    private static final String UPDATE_NAVIGATOR =
+            "UPDATE profile_navigators\n"
+                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)\n"
+                    + "WHERE session_id = :sessionId";
+
+    private static final String GET_NAVIGATOR =
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
+                    + "FROM profile_navigators WHERE session_id = :sessionId";
+
+    private static final String ADD_FILTER =
+            "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
+                    + "size)"
+                    + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)\n"
+                    + "RETURNING id";
+
+    private static final String UPDATE_FILTER =
+            "UPDATE profile_filters\n"
+                    + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
+                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size\n"
+                    + "WHERE session_id = :sessionId";
+
+    private static final String GET_FILTER =
+            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size\n"
+                    + "FROM profile_filters\n"
+                    + "WHERE session_id = :sessionId";
+
+    private static final String ADD_TELEGRAM =
+            "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code,\n"
+                    + "allows_write_to_pm, query_id, chat_id)\n"
+                    + "VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode,\n"
+                    + ":allowsWriteToPm, :queryId, :chatId)\n"
+                    + "RETURNING id";
+
+    private static final String GET_IMAGE_LIST =
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
                     + "created_at, updated_at\n"
                     + "FROM profile_images\n"
                     + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false";
 
-    private static final String GET_PROFILE_IMAGE_PUBLIC_LIST_BY_SESSION_ID =
+    private static final String GET_IMAGE_PUBLIC_LIST =
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,"
                     + "created_at, updated_at\n"
                     + "FROM profile_images\n"
                     + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
 
-    private static final String GET_PROFILE_TELEGRAM_BY_SESSION_ID =
+    private static final String GET_TELEGRAM =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
                     + "allows_write_to_pm, query_id, chat_id\n"
                     + "FROM profile_telegram\n"
                     + "WHERE session_id = :sessionId";
+
+    private static final String ADD_LIKE =
+            "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, created_at, updated_at\n"
+                    + "VALUES (:sessionId, :liked_session_id, :is_liked, :created_at, :updated_at)\n"
+                    + "RETURNING id";
 
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -150,169 +155,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 "SELECT * FROM profiles WHERE session_id = :sessionId",
                 parameters,
                 new ProfileEntityRowMapper()
-        );
-    }
-
-    @Transactional
-    @Override
-    public void updateLastOnline(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId)
-                .addValue("lastOnline", Utils.getNowUtc());
-        namedParameterJdbcTemplate.update(
-                UPDATE_LAST_ONLINE,
-                parameters
-        );
-    }
-
-    @Transactional
-    @Override
-    public ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileImageAddDto.getSessionId())
-                .addValue("name", requestProfileImageAddDto.getName())
-                .addValue("url", requestProfileImageAddDto.getUrl())
-                .addValue("size", requestProfileImageAddDto.getSize())
-                .addValue("isDeleted", requestProfileImageAddDto.getIsDeleted())
-                .addValue("isBlocked", requestProfileImageAddDto.getIsBlocked())
-                .addValue("isPrimary", requestProfileImageAddDto.getIsPrimary())
-                .addValue("isPrivate", requestProfileImageAddDto.getIsPrivate())
-                .addValue("createdAt", requestProfileImageAddDto.getCreatedAt())
-                .addValue("updatedAt", requestProfileImageAddDto.getUpdatedAt());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_PROFILE_IMAGE, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT * FROM profile_images WHERE id = " + insertedId,
-                parameters,
-                new ProfileImageEntityRowMapper()
-        );
-    }
-
-    @Transactional
-    @Override
-    public ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto) {
-        String sessionId = requestProfileNavigatorAddDto.getSessionId();
-        Double latitude = requestProfileNavigatorAddDto.getLatitude();
-        Double longitude = requestProfileNavigatorAddDto.getLongitude();
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId)
-                .addValue("latitude", latitude) // широта
-                .addValue("longitude", longitude); // долгота
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_PROFILE_NAVIGATOR, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude" +
-                        " FROM profile_navigators WHERE id = " + insertedId,
-                parameters,
-                new ProfileNavigatorEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
-        String sessionId = requestProfileNavigatorUpdateDto.getSessionId();
-        Double latitude = requestProfileNavigatorUpdateDto.getLatitude();
-        Double longitude = requestProfileNavigatorUpdateDto.getLongitude();
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId)
-                .addValue("latitude", latitude) // широта
-                .addValue("longitude", longitude); // долгота
-        namedParameterJdbcTemplate.update(
-                UPDATE_PROFILE_NAVIGATOR,
-                parameters
-        );
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_NAVIGATOR,
-                parameters,
-                new ProfileNavigatorEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_NAVIGATOR,
-                parameters,
-                new ProfileNavigatorEntityRowMapper()
-        );
-    }
-
-    @Transactional
-    @Override
-    public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileFilterAddDto.getSessionId())
-                .addValue("searchGender", requestProfileFilterAddDto.getSearchGender())
-                .addValue("lookingFor", requestProfileFilterAddDto.getLookingFor())
-                .addValue("ageFrom", requestProfileFilterAddDto.getAgeFrom())
-                .addValue("ageTo", requestProfileFilterAddDto.getAgeTo())
-                .addValue("distance", requestProfileFilterAddDto.getDistance())
-                .addValue("page", requestProfileFilterAddDto.getPage())
-                .addValue("size", requestProfileFilterAddDto.getSize());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_PROFILE_FILTER, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT * FROM profile_filters WHERE id = " + insertedId,
-                parameters,
-                new ProfileFilterEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileFilterUpdateDto.getSessionId())
-                .addValue("searchGender", requestProfileFilterUpdateDto.getSearchGender())
-                .addValue("lookingFor", requestProfileFilterUpdateDto.getLookingFor())
-                .addValue("ageFrom", requestProfileFilterUpdateDto.getAgeFrom())
-                .addValue("ageTo", requestProfileFilterUpdateDto.getAgeTo())
-                .addValue("distance", requestProfileFilterUpdateDto.getDistance())
-                .addValue("page", requestProfileFilterUpdateDto.getPage())
-                .addValue("size", requestProfileFilterUpdateDto.getSize());
-        namedParameterJdbcTemplate.update(UPDATE_PROFILE_FILTER, parameters);
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_FILTER,
-                parameters,
-                new ProfileFilterEntityRowMapper()
-        );
-    }
-
-    @Override
-    public ProfileFilterEntity findFilterBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_FILTER,
-                parameters,
-                new ProfileFilterEntityRowMapper()
-        );
-    }
-
-    @Transactional
-    @Override
-    public ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", requestProfileTelegramAddDto.getSessionId())
-                .addValue("userId", requestProfileTelegramAddDto.getUserId())
-                .addValue("username", requestProfileTelegramAddDto.getUsername())
-                .addValue("firstName", requestProfileTelegramAddDto.getFirstName())
-                .addValue("lastName", requestProfileTelegramAddDto.getLastName())
-                .addValue("languageCode", requestProfileTelegramAddDto.getLanguageCode())
-                .addValue("allowsWriteToPm", requestProfileTelegramAddDto.getAllowsWriteToPm())
-                .addValue("queryId", requestProfileTelegramAddDto.getQueryId())
-                .addValue("chatId", requestProfileTelegramAddDto.getChatId());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_PROFILE_TELEGRAM, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
-        return namedParameterJdbcTemplate.queryForObject(
-                "SELECT * FROM profile_telegram WHERE id = " + insertedId,
-                parameters,
-                new ProfileTelegramEntityRowMapper()
         );
     }
 
@@ -359,12 +201,175 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         );
     }
 
+    @Transactional
+    @Override
+    public void updateLastOnline(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("lastOnline", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(
+                UPDATE_LAST_ONLINE,
+                parameters
+        );
+    }
+
+    @Transactional
+    @Override
+    public ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileImageAddDto.getSessionId())
+                .addValue("name", requestProfileImageAddDto.getName())
+                .addValue("url", requestProfileImageAddDto.getUrl())
+                .addValue("size", requestProfileImageAddDto.getSize())
+                .addValue("isDeleted", requestProfileImageAddDto.getIsDeleted())
+                .addValue("isBlocked", requestProfileImageAddDto.getIsBlocked())
+                .addValue("isPrimary", requestProfileImageAddDto.getIsPrimary())
+                .addValue("isPrivate", requestProfileImageAddDto.getIsPrivate())
+                .addValue("createdAt", requestProfileImageAddDto.getCreatedAt())
+                .addValue("updatedAt", requestProfileImageAddDto.getUpdatedAt());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_IMAGE, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_images WHERE id = " + insertedId,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Transactional
+    @Override
+    public ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto) {
+        String sessionId = requestProfileNavigatorAddDto.getSessionId();
+        Double latitude = requestProfileNavigatorAddDto.getLatitude();
+        Double longitude = requestProfileNavigatorAddDto.getLongitude();
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("longitude", longitude) // долгота
+                .addValue("latitude", latitude); // широта
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_NAVIGATOR, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
+                        + "FROM profile_navigators WHERE id = " + insertedId,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
+        String sessionId = requestProfileNavigatorUpdateDto.getSessionId();
+        Double latitude = requestProfileNavigatorUpdateDto.getLatitude();
+        Double longitude = requestProfileNavigatorUpdateDto.getLongitude();
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("longitude", longitude) // долгота
+                .addValue("latitude", latitude); // широта
+        namedParameterJdbcTemplate.update(
+                UPDATE_NAVIGATOR,
+                parameters
+        );
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_NAVIGATOR,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileNavigatorEntity findNavigatorBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_NAVIGATOR,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
+        );
+    }
+
+    @Transactional
+    @Override
+    public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileFilterAddDto.getSessionId())
+                .addValue("searchGender", requestProfileFilterAddDto.getSearchGender())
+                .addValue("lookingFor", requestProfileFilterAddDto.getLookingFor())
+                .addValue("ageFrom", requestProfileFilterAddDto.getAgeFrom())
+                .addValue("ageTo", requestProfileFilterAddDto.getAgeTo())
+                .addValue("distance", requestProfileFilterAddDto.getDistance())
+                .addValue("page", requestProfileFilterAddDto.getPage())
+                .addValue("size", requestProfileFilterAddDto.getSize());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_FILTER, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_filters WHERE id = " + insertedId,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileFilterUpdateDto.getSessionId())
+                .addValue("searchGender", requestProfileFilterUpdateDto.getSearchGender())
+                .addValue("lookingFor", requestProfileFilterUpdateDto.getLookingFor())
+                .addValue("ageFrom", requestProfileFilterUpdateDto.getAgeFrom())
+                .addValue("ageTo", requestProfileFilterUpdateDto.getAgeTo())
+                .addValue("distance", requestProfileFilterUpdateDto.getDistance())
+                .addValue("page", requestProfileFilterUpdateDto.getPage())
+                .addValue("size", requestProfileFilterUpdateDto.getSize());
+        namedParameterJdbcTemplate.update(UPDATE_FILTER, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_FILTER,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileFilterEntity findFilterBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_FILTER,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Transactional
+    @Override
+    public ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileTelegramAddDto.getSessionId())
+                .addValue("userId", requestProfileTelegramAddDto.getUserId())
+                .addValue("username", requestProfileTelegramAddDto.getUsername())
+                .addValue("firstName", requestProfileTelegramAddDto.getFirstName())
+                .addValue("lastName", requestProfileTelegramAddDto.getLastName())
+                .addValue("languageCode", requestProfileTelegramAddDto.getLanguageCode())
+                .addValue("allowsWriteToPm", requestProfileTelegramAddDto.getAllowsWriteToPm())
+                .addValue("queryId", requestProfileTelegramAddDto.getQueryId())
+                .addValue("chatId", requestProfileTelegramAddDto.getChatId());
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_TELEGRAM, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_telegram WHERE id = " + insertedId,
+                parameters,
+                new ProfileTelegramEntityRowMapper()
+        );
+    }
+
     @Override
     public List<ProfileImageEntity> findImageListBySessionID(String sessionId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId);
         return namedParameterJdbcTemplate.query(
-                GET_PROFILE_IMAGE_LIST_BY_SESSION_ID,
+                GET_IMAGE_LIST,
                 parameters,
                 new ProfileImageEntityRowMapper()
         );
@@ -375,7 +380,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId);
         return namedParameterJdbcTemplate.query(
-                GET_PROFILE_IMAGE_PUBLIC_LIST_BY_SESSION_ID,
+                GET_IMAGE_PUBLIC_LIST,
                 parameters,
                 new ProfileImageEntityRowMapper()
         );
@@ -386,9 +391,27 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId);
         return namedParameterJdbcTemplate.queryForObject(
-                GET_PROFILE_TELEGRAM_BY_SESSION_ID,
+                GET_TELEGRAM,
                 parameters,
                 new ProfileTelegramEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileLikeEntity addLike(RequestProfileLikeAddDto requestProfileLikeAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileLikeAddDto.getSessionId())
+                .addValue("likedSessionId", requestProfileLikeAddDto.getLikedSessionId())
+                .addValue("isLiked", true)
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_LIKE, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_likes WHERE id = " + insertedId,
+                parameters,
+                new ProfileLikeEntityRowMapper()
         );
     }
 }
