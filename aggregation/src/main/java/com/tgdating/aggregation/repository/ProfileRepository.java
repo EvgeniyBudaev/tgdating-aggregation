@@ -37,4 +37,6 @@ public interface ProfileRepository {
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 
     ProfileLikeEntity addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
+
+    ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId);
 }

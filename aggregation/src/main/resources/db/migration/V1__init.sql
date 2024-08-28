@@ -100,7 +100,7 @@ CREATE TABLE IF NOT EXISTS profile_likes
 (
     id               BIGSERIAL NOT NULL PRIMARY KEY,
     session_id       VARCHAR   NOT NULL,
-    liked_session_id BIGINT    NOT NULL,
+    liked_session_id VARCHAR   NOT NULL,
     is_liked         BOOL      NOT NULL DEFAULT false,
     created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP NULL,

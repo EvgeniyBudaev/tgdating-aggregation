@@ -4,6 +4,7 @@ import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.mapper.*;
 import com.tgdating.aggregation.shared.utils.Utils;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -128,6 +129,11 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, created_at, updated_at\n"
                     + "VALUES (:sessionId, :liked_session_id, :is_liked, :created_at, :updated_at)\n"
                     + "RETURNING id";
+
+    private static final String GET_LIKE =
+            "SELECT id, session_id, liked_session_id, is_liked, created_at, updated_at\n"
+                    + "FROM profile_likes\n"
+                    + "WHERE session_id = :sessionId AND liked_session_id = :likedSessionId";
 
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
@@ -413,5 +419,21 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 parameters,
                 new ProfileLikeEntityRowMapper()
         );
+    }
+
+    @Override
+    public ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId) {
+        try {
+            MapSqlParameterSource parameters = new MapSqlParameterSource()
+                    .addValue("sessionId", sessionId)
+                    .addValue("likedSessionId", likedSessionId);
+            return namedParameterJdbcTemplate.queryForObject(
+                    GET_LIKE,
+                    parameters,
+                    new ProfileLikeEntityRowMapper());
+
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 }

@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -137,9 +138,9 @@ public class ProfileServiceImpl implements ProfileService {
         updateNavigator(viewerSessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
-        ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
-        ProfileFilterEntity profileFilterEntity = findFilterBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
+        Optional<ProfileLikeEntity> profileLikeEntity =
+                Optional.ofNullable(findLikeBySessionID(viewerSessionId, sessionId));
         boolean isOnline = Utils.calculateIsOnline(profileEntity.getLastOnline());
         return ResponseProfileDetailGetDto.builder()
                 .sessionId(profileEntity.getSessionId())
@@ -171,6 +172,14 @@ public class ProfileServiceImpl implements ProfileService {
                         .queryId(profileTelegramEntity.getQueryId())
                         .chatId(profileTelegramEntity.getChatId())
                         .build())
+                .like(profileLikeEntity.map(likeEntity -> ResponseProfileLikeDto.builder()
+                        .id(likeEntity.getId())
+                        .sessionId(likeEntity.getSessionId())
+                        .likedSessionId(likeEntity.getLikedSessionId())
+                        .isLiked(likeEntity.getIsLiked())
+                        .createdAt(likeEntity.getCreatedAt())
+                        .updatedAt(likeEntity.getUpdatedAt())
+                        .build()).orElse(null))
                 .build();
     }
 
@@ -363,5 +372,9 @@ public class ProfileServiceImpl implements ProfileService {
 
     private ProfileTelegramEntity findTelegramBySessionID(String sessionId) {
         return profileRepository.findTelegramBySessionID(sessionId);
+    }
+
+    private ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId) {
+        return profileRepository.findLikeBySessionID(sessionId, likedSessionId);
     }
 }

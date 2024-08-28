@@ -30,4 +30,5 @@ public class ResponseProfileDetailGetDto {
     private LocalDateTime lastOnline;
     private List<ProfileImageEntity> images;
     private ResponseProfileTelegramDto telegram;
+    private ResponseProfileLikeDto like;
 }
