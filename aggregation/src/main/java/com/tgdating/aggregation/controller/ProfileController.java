@@ -3,7 +3,6 @@ package com.tgdating.aggregation.controller;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
-import com.tgdating.aggregation.model.ProfileFilterEntity;
 import com.tgdating.aggregation.service.ProfileService;
 import com.tgdating.aggregation.shared.Constants;
 import org.springframework.http.HttpStatus;
@@ -32,6 +31,13 @@ public class ProfileController {
             @ModelAttribute RequestProfileCreateDto requestProfileCreateDto) {
         System.out.println("controller createProfile: " + requestProfileCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(profileService.create(requestProfileCreateDto));
+    }
+
+    @PutMapping
+    public ResponseEntity<ResponseProfileUpdateDto> updateProfile(
+            @ModelAttribute RequestProfileUpdateDto requestProfileUpdateDto) {
+        System.out.println("controller updateProfile: " + requestProfileUpdateDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(profileService.update(requestProfileUpdateDto));
     }
 
     @GetMapping("/list")

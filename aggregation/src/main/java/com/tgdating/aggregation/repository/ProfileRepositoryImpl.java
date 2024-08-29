@@ -24,6 +24,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height,\n"
                     + ":weight, :createdAt, :lastOnline)";
 
+    private static final String UPDATE_PROFILE =
+            "UPDATE profiles\n"
+                    + "SET display_name = :displayName, birthday = :birthday, gender = :gender,\n"
+                    + "location = :location, description = :description, height = :height, weight = :weight,\n"
+                    + "updated_at = :updatedAt, last_online = :lastOnline\n"
+                    + "WHERE session_id = :sessionId";
+
     private static final String GET_PROFILE_LIST_BY_SESSION_ID =
             "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height,\n"
                     + "p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible,\n"
@@ -107,6 +114,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + ":allowsWriteToPm, :queryId, :chatId)\n"
                     + "RETURNING id";
 
+    private static final String UPDATE_TELEGRAM =
+            "UPDATE profile_telegram\n"
+                    + "SET session_id=:sessionId, user_id=:userId, username=:username,\n"
+                    + "first_name=:firstName, last_name=:lastName, language_code=:languageCode,\n"
+                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId\n"
+                    + "WHERE session_id = :sessionId";
+
     private static final String GET_IMAGE_LIST =
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
                     + "created_at, updated_at\n"
@@ -157,6 +171,29 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("lastOnline", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(CREATE_PROFILE, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profiles WHERE session_id = :sessionId",
+                parameters,
+                new ProfileEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileEntity update(RequestProfileUpdateDto requestProfileUpdateDto) {
+        Double height = requestProfileUpdateDto.getHeight() != null ? requestProfileUpdateDto.getHeight() : 0.0;
+        Double weight = requestProfileUpdateDto.getWeight() != null ? requestProfileUpdateDto.getWeight() : 0.0;
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileUpdateDto.getSessionId())
+                .addValue("displayName", requestProfileUpdateDto.getDisplayName())
+                .addValue("birthday", requestProfileUpdateDto.getBirthday())
+                .addValue("gender", requestProfileUpdateDto.getGender())
+                .addValue("location", requestProfileUpdateDto.getLocation())
+                .addValue("description", requestProfileUpdateDto.getDescription())
+                .addValue("height", height)
+                .addValue("weight", weight)
+                .addValue("updatedAt", Utils.getNowUtc())
+                .addValue("lastOnline", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(UPDATE_PROFILE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profiles WHERE session_id = :sessionId",
                 parameters,
@@ -365,6 +402,27 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_telegram WHERE id = " + insertedId,
+                parameters,
+                new ProfileTelegramEntityRowMapper()
+        );
+    }
+
+    @Transactional
+    @Override
+    public ProfileTelegramEntity updateTelegram(RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileTelegramUpdateDto.getSessionId())
+                .addValue("userId", requestProfileTelegramUpdateDto.getUserId())
+                .addValue("username", requestProfileTelegramUpdateDto.getUsername())
+                .addValue("firstName", requestProfileTelegramUpdateDto.getFirstName())
+                .addValue("lastName", requestProfileTelegramUpdateDto.getLastName())
+                .addValue("languageCode", requestProfileTelegramUpdateDto.getLanguageCode())
+                .addValue("allowsWriteToPm", requestProfileTelegramUpdateDto.getAllowsWriteToPm())
+                .addValue("queryId", requestProfileTelegramUpdateDto.getQueryId())
+                .addValue("chatId", requestProfileTelegramUpdateDto.getChatId());
+        namedParameterJdbcTemplate.update(UPDATE_TELEGRAM, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_TELEGRAM,
                 parameters,
                 new ProfileTelegramEntityRowMapper()
         );

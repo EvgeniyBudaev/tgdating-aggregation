@@ -39,6 +39,90 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
+    @Override
+    public ResponseProfileUpdateDto update(RequestProfileUpdateDto requestProfileUpdateDto) {
+        String sessionId = requestProfileUpdateDto.getSessionId();
+        Double latitude = requestProfileUpdateDto.getLatitude();
+        Double longitude = requestProfileUpdateDto.getLongitude();
+        RequestProfileFilterUpdateDto requestProfileFilterUpdateDto = RequestProfileFilterUpdateDto.builder()
+                .sessionId(requestProfileUpdateDto.getSessionId())
+                .searchGender(requestProfileUpdateDto.getSearchGender())
+                .lookingFor(requestProfileUpdateDto.getLookingFor())
+                .ageFrom(requestProfileUpdateDto.getAgeFrom())
+                .ageTo(requestProfileUpdateDto.getAgeTo())
+                .distance(requestProfileUpdateDto.getDistance())
+                .page(requestProfileUpdateDto.getPage())
+                .size(requestProfileUpdateDto.getSize())
+                .latitude(latitude)
+                .longitude(longitude)
+                .build();
+        RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto = RequestProfileTelegramUpdateDto.builder()
+                .sessionId(requestProfileUpdateDto.getSessionId())
+                .userId(requestProfileUpdateDto.getTelegramUserId())
+                .username(requestProfileUpdateDto.getTelegramUsername())
+                .firstName(requestProfileUpdateDto.getTelegramFirstName())
+                .lastName(requestProfileUpdateDto.getTelegramLastName())
+                .languageCode(requestProfileUpdateDto.getTelegramLanguageCode())
+                .allowsWriteToPm(requestProfileUpdateDto.getTelegramAllowsWriteToPm())
+                .queryId(requestProfileUpdateDto.getTelegramQueryId())
+                .chatId(requestProfileUpdateDto.getTelegramChatId())
+                .build();
+        updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
+        updateFilter(requestProfileFilterUpdateDto);
+        updateTelegram(requestProfileTelegramUpdateDto);
+        ProfileEntity profileEntity = profileRepository.update(requestProfileUpdateDto);
+        List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
+        ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
+        ProfileFilterEntity profileFilterEntity = findFilterBySessionID(sessionId);
+        ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
+        boolean isOnline = Utils.calculateIsOnline(profileEntity.getLastOnline());
+        return ResponseProfileUpdateDto.builder()
+                .sessionId(profileEntity.getSessionId())
+                .displayName(profileEntity.getDisplayName())
+                .birthday(profileEntity.getBirthday())
+                .gender(profileEntity.getGender())
+                .location(profileEntity.getLocation())
+                .description(profileEntity.getDescription())
+                .height(profileEntity.getHeight())
+                .weight(profileEntity.getWeight())
+                .isDeleted(profileEntity.getIsDeleted())
+                .isBlocked(profileEntity.getIsBlocked())
+                .isPremium(profileEntity.getIsPremium())
+                .isShowDistance(profileEntity.getIsShowDistance())
+                .isInvisible(profileEntity.getIsInvisible())
+                .isOnline(isOnline)
+                .createdAt(profileEntity.getCreatedAt())
+                .updatedAt(profileEntity.getUpdatedAt())
+                .lastOnline(profileEntity.getLastOnline())
+                .navigator(ResponseProfileNavigatorDto.builder()
+                        .sessionId(profileNavigatorEntity.getSessionId())
+                        .location(profileNavigatorEntity.getLocation())
+                        .build())
+                .filter(ResponseProfileFilterDto.builder()
+                        .sessionId(profileFilterEntity.getSessionId())
+                        .searchGender(profileFilterEntity.getSearchGender())
+                        .lookingFor(profileFilterEntity.getLookingFor())
+                        .ageFrom(profileFilterEntity.getAgeFrom())
+                        .ageTo(profileFilterEntity.getAgeTo())
+                        .distance(profileFilterEntity.getDistance())
+                        .page(profileFilterEntity.getPage())
+                        .size(profileFilterEntity.getSize())
+                        .build())
+                .telegram(ResponseProfileTelegramDto.builder()
+                        .sessionId(profileTelegramEntity.getSessionId())
+                        .userId(profileTelegramEntity.getUserId())
+                        .username(profileTelegramEntity.getUsername())
+                        .firstName(profileTelegramEntity.getFirstName())
+                        .lastName(profileTelegramEntity.getLastName())
+                        .languageCode(profileTelegramEntity.getLanguageCode())
+                        .allowsWriteToPm(profileTelegramEntity.getAllowsWriteToPm())
+                        .queryId(profileTelegramEntity.getQueryId())
+                        .chatId(profileTelegramEntity.getChatId())
+                        .build())
+                .build();
+    }
+
     public PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
         String sessionId = requestProfileListGetDto.getSessionId();
         Double latitude = requestProfileListGetDto.getLatitude();
@@ -188,8 +272,11 @@ public class ProfileServiceImpl implements ProfileService {
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
+        ProfileImageEntity lastImage = profileImageListEntity.getLast();
         return ResponseProfileShortInfoGetDto.builder()
                 .sessionId(profileEntity.getSessionId())
+                .imageUrl(lastImage.getUrl())
                 .isDeleted(profileEntity.getIsDeleted())
                 .isBlocked(profileEntity.getIsBlocked())
                 .build();
@@ -318,6 +405,10 @@ public class ProfileServiceImpl implements ProfileService {
                         .chatId(requestProfileCreateDto.getTelegramChatId())
                         .build()
         );
+    }
+
+    private ProfileTelegramEntity updateTelegram(RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto) {
+        return profileRepository.updateTelegram(requestProfileTelegramUpdateDto);
     }
 
     public ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude) {

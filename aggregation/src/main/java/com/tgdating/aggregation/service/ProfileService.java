@@ -9,6 +9,8 @@ import java.util.List;
 public interface ProfileService {
     ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto);
 
+    ResponseProfileUpdateDto update(RequestProfileUpdateDto requestProfileUpdateDto);
+
     PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
     ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude);

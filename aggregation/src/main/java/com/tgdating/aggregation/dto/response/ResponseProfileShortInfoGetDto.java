@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class ResponseProfileShortInfoGetDto {
     private String sessionId;
+    private String imageUrl;
     private Boolean isDeleted;
     private Boolean isBlocked;
 }
