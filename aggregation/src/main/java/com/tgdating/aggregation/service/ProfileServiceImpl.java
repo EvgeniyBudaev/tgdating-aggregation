@@ -5,12 +5,15 @@ import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.*;
 import com.tgdating.aggregation.repository.ProfileRepository;
 import com.tgdating.aggregation.shared.exception.InternalServerException;
+import com.tgdating.aggregation.shared.exception.NotFoundException;
 import com.tgdating.aggregation.shared.utils.ImageConverter;
 import com.tgdating.aggregation.shared.utils.Utils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -282,6 +285,23 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
+    @Override
+    public ProfileImageEntity deleteImage(Long id) {
+        ProfileImageEntity profileImageEntity = profileRepository.findImageByID(id);
+        if (profileImageEntity.getIsDeleted()) {
+            throw new NotFoundException(
+                    "Файл был удален",
+                    "The file has been deleted"
+            );
+        }
+        String filePath = BASE_PROJECT_PATH.resolve("src/main/resources/static/images")
+                .resolve(profileImageEntity.getSessionId())
+                .resolve(profileImageEntity.getName())
+                .toString();
+        deleteFileFromFileSystem(filePath);
+        return profileRepository.deleteImage(id);
+    }
+
     private void updateLastOnline(String sessionId) {
         profileRepository.updateLastOnline(sessionId);
     }
@@ -307,6 +327,36 @@ public class ProfileServiceImpl implements ProfileService {
             throw new InternalServerException(
                     "Ошибка сохранения файла",
                     "Ошибка сохранения файла на сервер: " + e.getMessage()
+            );
+        }
+    }
+
+    private void deleteFileFromFileSystem(String filePath) {
+        try {
+            File fileToDelete = new File(filePath);
+            if (!fileToDelete.exists()) {
+                throw new NotFoundException(
+                        "Файл не найден",
+                        "File does not exist: " + filePath
+                );
+            }
+            if (!fileToDelete.delete()) {
+                throw new IOException("Failed to delete file: " + filePath);
+            }
+        } catch (NotFoundException e) {
+            throw new NotFoundException(
+                    "Файл не найден",
+                    "File does not exist: " + filePath
+            );
+        } catch (IOException e) {
+            throw new InternalServerException(
+                    "Ошибка удаления файла",
+                    "Error occurred while deleting file: " + e.getMessage()
+            );
+        } catch (Exception e) {
+            throw new InternalServerException(
+                    "Ошибка удаления файла",
+                    "Unexpected error occurred while deleting file: " + e.getMessage()
             );
         }
     }

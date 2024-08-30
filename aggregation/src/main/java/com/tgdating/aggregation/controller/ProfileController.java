@@ -3,6 +3,7 @@ package com.tgdating.aggregation.controller;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
+import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.service.ProfileService;
 import com.tgdating.aggregation.shared.Constants;
 import org.springframework.http.HttpStatus;
@@ -100,6 +101,15 @@ public class ProfileController {
         System.out.println("controller getProfileShortInfo sessionId: " + sessionId);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(profileService.getProfileShortInfo(sessionId, latitude, longitude));
+    }
+
+    @DeleteMapping("/images/{id}")
+    public ResponseEntity<ProfileImageEntity> deleteImage(
+            @PathVariable Long id
+    ) {
+        System.out.println("controller deleteImage id: " + id);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(profileService.deleteImage(id));
     }
 
     @GetMapping("/{sessionId}/filter")

@@ -77,6 +77,33 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate,\n"
                     + ":createdAt, :updatedAt) RETURNING id";
 
+//    private static final String UPDATE_IMAGE =
+//            "UPDATE profile_images SET name = :name, url = :url, size = :size, is_deleted = :isDeleted,\n"
+//                    + "is_blocked = :isBlocked, is_primary = :isPrimary, is_private = :isPrivate,\n"
+//                    + "updated_at = :updatedAt WHERE id = :id";
+
+    private static final String DELETE_IMAGE =
+            "UPDATE profile_images SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
+
+    private static final String GET_IMAGE_LIST =
+            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
+                    + "created_at, updated_at\n"
+                    + "FROM profile_images\n"
+                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false";
+
+    private static final String GET_IMAGE_PUBLIC_LIST =
+            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
+                    + "created_at, updated_at\n"
+                    + "FROM profile_images\n"
+                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
+
+    private static final String GET_IMAGE =
+            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
+                    + "created_at, updated_at\n"
+                    + "FROM profile_images\n"
+                    + "WHERE id = :id";
+
+
     private static final String ADD_NAVIGATOR =
             "INSERT INTO profile_navigators (session_id, location)\n"
                     + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326)) RETURNING id";
@@ -120,18 +147,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "first_name=:firstName, last_name=:lastName, language_code=:languageCode,\n"
                     + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId\n"
                     + "WHERE session_id = :sessionId";
-
-    private static final String GET_IMAGE_LIST =
-            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
-                    + "created_at, updated_at\n"
-                    + "FROM profile_images\n"
-                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false";
-
-    private static final String GET_IMAGE_PUBLIC_LIST =
-            "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,"
-                    + "created_at, updated_at\n"
-                    + "FROM profile_images\n"
-                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
 
     private static final String GET_TELEGRAM =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
@@ -275,6 +290,53 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_images WHERE id = " + insertedId,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileImageEntity deleteImage(Long id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("isDeleted", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(DELETE_IMAGE, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_IMAGE,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public List<ProfileImageEntity> findImageListBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.query(
+                GET_IMAGE_LIST,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId);
+        return namedParameterJdbcTemplate.query(
+                GET_IMAGE_PUBLIC_LIST,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileImageEntity findImageByID(Long id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", id);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_IMAGE,
                 parameters,
                 new ProfileImageEntityRowMapper()
         );
@@ -425,28 +487,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 GET_TELEGRAM,
                 parameters,
                 new ProfileTelegramEntityRowMapper()
-        );
-    }
-
-    @Override
-    public List<ProfileImageEntity> findImageListBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.query(
-                GET_IMAGE_LIST,
-                parameters,
-                new ProfileImageEntityRowMapper()
-        );
-    }
-
-    @Override
-    public List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId) {
-        MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("sessionId", sessionId);
-        return namedParameterJdbcTemplate.query(
-                GET_IMAGE_PUBLIC_LIST,
-                parameters,
-                new ProfileImageEntityRowMapper()
         );
     }
 

@@ -18,6 +18,14 @@ public interface ProfileRepository {
 
     ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto);
 
+    ProfileImageEntity deleteImage(Long id);
+
+    List<ProfileImageEntity> findImageListBySessionID(String sessionId);
+
+    List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId);
+
+    ProfileImageEntity findImageByID(Long id);
+
     ProfileNavigatorEntity addNavigator(RequestProfileNavigatorAddDto requestProfileNavigatorAddDto);
 
     ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto);
@@ -33,10 +41,6 @@ public interface ProfileRepository {
     ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);
 
     ProfileTelegramEntity updateTelegram(RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto);
-
-    List<ProfileImageEntity> findImageListBySessionID(String sessionId);
-
-    List<ProfileImageEntity> findImagePublicListBySessionID(String sessionId);
 
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 

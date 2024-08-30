@@ -3,6 +3,7 @@ package com.tgdating.aggregation.service;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
+import com.tgdating.aggregation.model.ProfileImageEntity;
 
 import java.util.List;
 
@@ -19,6 +20,8 @@ public interface ProfileService {
             String sessionId, String viewerSessionId, Double latitude, Double longitude);
 
     ResponseProfileShortInfoGetDto getProfileShortInfo(String sessionId, Double latitude, Double longitude);
+
+    ProfileImageEntity deleteImage(Long id);
 
     ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude);
 

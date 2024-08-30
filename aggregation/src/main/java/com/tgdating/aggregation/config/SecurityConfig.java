@@ -38,7 +38,8 @@ public class SecurityConfig {
             web.ignoring().requestMatchers(
                     HttpMethod.DELETE,
                     "/public/**",
-                    "/api/v1/users/{id}"
+                    "/api/v1/users/{id}",
+                    "/**"
             );
             web.ignoring().requestMatchers(
                     HttpMethod.PUT,
