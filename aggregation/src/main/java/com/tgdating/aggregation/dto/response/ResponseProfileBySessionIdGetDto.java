@@ -28,8 +28,8 @@ public class ResponseProfileBySessionIdGetDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastOnline;
-    private List<ProfileImageEntity> images;
     private ResponseProfileNavigatorDto navigator;
     private ResponseProfileFilterDto filter;
     private ResponseProfileTelegramDto telegram;
+    private List<ProfileImageEntity> images;
 }

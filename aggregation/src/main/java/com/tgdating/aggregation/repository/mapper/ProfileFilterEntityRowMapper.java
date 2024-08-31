@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Optional;
 
 public class ProfileFilterEntityRowMapper implements RowMapper<ProfileFilterEntity> {
     @Override
@@ -18,7 +20,10 @@ public class ProfileFilterEntityRowMapper implements RowMapper<ProfileFilterEnti
                 rs.getInt("age_to"),
                 rs.getDouble("distance"),
                 rs.getInt("page"),
-                rs.getInt("size")
+                rs.getInt("size"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                Optional.ofNullable(rs.getTimestamp("updated_at"))
+                        .map(Timestamp::toLocalDateTime).orElse(null)
         );
     }
 }

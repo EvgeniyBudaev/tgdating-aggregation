@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Data
 @Builder
@@ -18,4 +20,6 @@ public class ProfileTelegramEntity {
     private Boolean allowsWriteToPm;
     private String queryId;
     private Long chatId;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

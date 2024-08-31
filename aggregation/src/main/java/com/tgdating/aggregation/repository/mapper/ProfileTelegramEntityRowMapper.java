@@ -5,6 +5,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Optional;
 
 public class ProfileTelegramEntityRowMapper implements RowMapper<ProfileTelegramEntity> {
     @Override
@@ -19,7 +21,10 @@ public class ProfileTelegramEntityRowMapper implements RowMapper<ProfileTelegram
                 rs.getString("language_code"),
                 rs.getBoolean("allows_write_to_pm"),
                 rs.getString("query_id"),
-                rs.getLong("chat_id")
+                rs.getLong("chat_id"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                Optional.ofNullable(rs.getTimestamp("updated_at"))
+                        .map(Timestamp::toLocalDateTime).orElse(null)
         );
     }
 }

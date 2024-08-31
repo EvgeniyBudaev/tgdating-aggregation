@@ -13,7 +13,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -71,10 +70,12 @@ public class ProfileServiceImpl implements ProfileService {
                 .chatId(requestProfileUpdateDto.getTelegramChatId())
                 .build();
         updateLastOnline(sessionId);
+        updateImages(requestProfileUpdateDto);
         updateNavigator(sessionId, latitude, longitude);
         updateFilter(requestProfileFilterUpdateDto);
         updateTelegram(requestProfileTelegramUpdateDto);
         ProfileEntity profileEntity = profileRepository.update(requestProfileUpdateDto);
+        checkUserExists(profileEntity.getIsDeleted());
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
         ProfileFilterEntity profileFilterEntity = findFilterBySessionID(sessionId);
@@ -123,6 +124,7 @@ public class ProfileServiceImpl implements ProfileService {
                         .queryId(profileTelegramEntity.getQueryId())
                         .chatId(profileTelegramEntity.getChatId())
                         .build())
+                .images(profileImageListEntity)
                 .build();
     }
 
@@ -167,6 +169,7 @@ public class ProfileServiceImpl implements ProfileService {
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        checkUserExists(profileEntity.getIsDeleted());
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
         ProfileFilterEntity profileFilterEntity = findFilterBySessionID(sessionId);
@@ -190,7 +193,6 @@ public class ProfileServiceImpl implements ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .lastOnline(profileEntity.getLastOnline())
-                .images(profileImageListEntity)
                 .navigator(ResponseProfileNavigatorDto.builder()
                         .sessionId(profileNavigatorEntity.getSessionId())
                         .location(profileNavigatorEntity.getLocation())
@@ -216,6 +218,7 @@ public class ProfileServiceImpl implements ProfileService {
                         .queryId(profileTelegramEntity.getQueryId())
                         .chatId(profileTelegramEntity.getChatId())
                         .build())
+                .images(profileImageListEntity)
                 .build();
     }
 
@@ -224,6 +227,7 @@ public class ProfileServiceImpl implements ProfileService {
         updateLastOnline(viewerSessionId);
         updateNavigator(viewerSessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        checkUserExists(profileEntity.getIsDeleted());
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
         Optional<ProfileLikeEntity> profileLikeEntity =
@@ -247,7 +251,6 @@ public class ProfileServiceImpl implements ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .lastOnline(profileEntity.getLastOnline())
-                .images(profileImageListEntity)
                 .telegram(ResponseProfileTelegramDto.builder()
                         .sessionId(profileTelegramEntity.getSessionId())
                         .userId(profileTelegramEntity.getUserId())
@@ -267,6 +270,7 @@ public class ProfileServiceImpl implements ProfileService {
                         .createdAt(likeEntity.getCreatedAt())
                         .updatedAt(likeEntity.getUpdatedAt())
                         .build()).orElse(null))
+                .images(profileImageListEntity)
                 .build();
     }
 
@@ -275,6 +279,7 @@ public class ProfileServiceImpl implements ProfileService {
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
+        checkUserExists(profileEntity.getIsDeleted());
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileImageEntity lastImage = profileImageListEntity.getLast();
         return ResponseProfileShortInfoGetDto.builder()
@@ -311,6 +316,16 @@ public class ProfileServiceImpl implements ProfileService {
         for (MultipartFile file : requestProfileCreateDto.getImage()) {
             ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
             addImageToDB(sessionId, imageConverterRecord);
+        }
+    }
+
+    private void updateImages(RequestProfileUpdateDto requestProfileUpdateDto) {
+        String sessionId = requestProfileUpdateDto.getSessionId();
+        if (requestProfileUpdateDto.getImage() != null) {
+            for (MultipartFile file : requestProfileUpdateDto.getImage()) {
+                ImageConverterRecord imageConverterRecord = uploadImageToFileSystem(file, sessionId);
+                addImageToDB(sessionId, imageConverterRecord);
+            }
         }
     }
 
@@ -372,8 +387,6 @@ public class ProfileServiceImpl implements ProfileService {
                         .isBlocked(false)
                         .isPrimary(false)
                         .isPrivate(false)
-                        .createdAt(Utils.getNowUtc())
-                        .updatedAt(null)
                         .build()
         );
     }
@@ -517,5 +530,14 @@ public class ProfileServiceImpl implements ProfileService {
 
     private ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId) {
         return profileRepository.findLikeBySessionID(sessionId, likedSessionId);
+    }
+
+    private void checkUserExists(boolean isDeleted) {
+        if (isDeleted) {
+            throw new NotFoundException(
+                    "Пользователь был удален",
+                    "User has already been deleted"
+            );
+        }
     }
 }

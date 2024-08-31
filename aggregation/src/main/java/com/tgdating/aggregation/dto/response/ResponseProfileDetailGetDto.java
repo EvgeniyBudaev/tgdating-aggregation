@@ -28,7 +28,7 @@ public class ResponseProfileDetailGetDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private LocalDateTime lastOnline;
-    private List<ProfileImageEntity> images;
     private ResponseProfileTelegramDto telegram;
     private ResponseProfileLikeDto like;
+    private List<ProfileImageEntity> images;
 }

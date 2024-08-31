@@ -6,6 +6,8 @@ import org.springframework.jdbc.core.RowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.util.Optional;
 
 public class ProfileNavigatorEntityRowMapper implements RowMapper<ProfileNavigatorEntity> {
     @Override
@@ -18,7 +20,10 @@ public class ProfileNavigatorEntityRowMapper implements RowMapper<ProfileNavigat
         return new ProfileNavigatorEntity(
                 rs.getLong("id"),
                 rs.getString("session_id"),
-                location
+                location,
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                Optional.ofNullable(rs.getTimestamp("updated_at"))
+                        .map(Timestamp::toLocalDateTime).orElse(null)
         );
     }
 }

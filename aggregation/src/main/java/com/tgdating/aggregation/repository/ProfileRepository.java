@@ -18,6 +18,8 @@ public interface ProfileRepository {
 
     ProfileImageEntity addImage(RequestProfileImageAddDto requestProfileImageAddDto);
 
+    ProfileImageEntity updateImage(RequestProfileImageUpdateDto requestProfileImageUpdateDto);
+
     ProfileImageEntity deleteImage(Long id);
 
     List<ProfileImageEntity> findImageListBySessionID(String sessionId);

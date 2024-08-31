@@ -5,8 +5,8 @@ import lombok.Data;
 
 @Data
 @Builder
-public class RequestProfileImageAddDto {
-    private String sessionId;
+public class RequestProfileImageUpdateDto {
+    private Long id;
     private String name;
     private String url;
     private Long size;

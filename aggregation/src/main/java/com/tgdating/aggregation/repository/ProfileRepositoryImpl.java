@@ -20,9 +20,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String CREATE_PROFILE =
             "INSERT INTO profiles (session_id, display_name, birthday, gender, location, description, height,\n"
-                    + "weight, created_at, last_online)\n"
+                    + "weight, created_at, updated_at, last_online)\n"
                     + "VALUES (:sessionId, :displayName, :birthday, :gender, :location, :description, :height,\n"
-                    + ":weight, :createdAt, :lastOnline)";
+                    + ":weight, :createdAt, :updatedAt, :lastOnline)";
 
     private static final String UPDATE_PROFILE =
             "UPDATE profiles\n"
@@ -77,10 +77,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :name, :url, :size, :isDeleted, :isBlocked, :isPrimary, :isPrivate,\n"
                     + ":createdAt, :updatedAt) RETURNING id";
 
-//    private static final String UPDATE_IMAGE =
-//            "UPDATE profile_images SET name = :name, url = :url, size = :size, is_deleted = :isDeleted,\n"
-//                    + "is_blocked = :isBlocked, is_primary = :isPrimary, is_private = :isPrivate,\n"
-//                    + "updated_at = :updatedAt WHERE id = :id";
+    private static final String UPDATE_IMAGE =
+            "UPDATE profile_images SET name = :name, url = :url, size = :size, is_deleted = :isDeleted,\n"
+                    + "is_blocked = :isBlocked, is_primary = :isPrimary, is_private = :isPrivate,\n"
+                    + "updated_at = :updatedAt WHERE id = :id";
 
     private static final String DELETE_IMAGE =
             "UPDATE profile_images SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
@@ -105,52 +105,56 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
 
     private static final String ADD_NAVIGATOR =
-            "INSERT INTO profile_navigators (session_id, location)\n"
-                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326)) RETURNING id";
+            "INSERT INTO profile_navigators (session_id, location, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326), :createdAt,\n"
+                    + ":updatedAt) RETURNING id";
 
     private static final String UPDATE_NAVIGATOR =
             "UPDATE profile_navigators\n"
-                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326)\n"
+                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), updated_at=:updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String GET_NAVIGATOR =
-            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude, created_at, updated_at\n"
                     + "FROM profile_navigators WHERE session_id = :sessionId";
 
     private static final String ADD_FILTER =
             "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
-                    + "size)"
-                    + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size)\n"
+                    + "size, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size,\n"
+                    + ":createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
     private static final String UPDATE_FILTER =
             "UPDATE profile_filters\n"
                     + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
-                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size\n"
+                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size,\n"
+                    + "updated_at=:updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String GET_FILTER =
-            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size\n"
+            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size, created_at,\n"
+                    + "updated_at\n"
                     + "FROM profile_filters\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String ADD_TELEGRAM =
             "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code,\n"
-                    + "allows_write_to_pm, query_id, chat_id)\n"
+                    + "allows_write_to_pm, query_id, chat_id, created_at, updated_at)\n"
                     + "VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode,\n"
-                    + ":allowsWriteToPm, :queryId, :chatId)\n"
+                    + ":allowsWriteToPm, :queryId, :chatId, :createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
     private static final String UPDATE_TELEGRAM =
             "UPDATE profile_telegram\n"
                     + "SET session_id=:sessionId, user_id=:userId, username=:username,\n"
                     + "first_name=:firstName, last_name=:lastName, language_code=:languageCode,\n"
-                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId\n"
+                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId, updated_at=:updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String GET_TELEGRAM =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
-                    + "allows_write_to_pm, query_id, chat_id\n"
+                    + "allows_write_to_pm, query_id, chat_id, created_at, updated_at\n"
                     + "FROM profile_telegram\n"
                     + "WHERE session_id = :sessionId";
 
@@ -184,6 +188,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("height", height)
                 .addValue("weight", weight)
                 .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null)
                 .addValue("lastOnline", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(CREATE_PROFILE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
@@ -283,13 +288,33 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isBlocked", requestProfileImageAddDto.getIsBlocked())
                 .addValue("isPrimary", requestProfileImageAddDto.getIsPrimary())
                 .addValue("isPrivate", requestProfileImageAddDto.getIsPrivate())
-                .addValue("createdAt", requestProfileImageAddDto.getCreatedAt())
-                .addValue("updatedAt", requestProfileImageAddDto.getUpdatedAt());
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_IMAGE, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_images WHERE id = " + insertedId,
+                parameters,
+                new ProfileImageEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileImageEntity updateImage(RequestProfileImageUpdateDto requestProfileImageUpdateDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", requestProfileImageUpdateDto.getId())
+                .addValue("name", requestProfileImageUpdateDto.getName())
+                .addValue("url", requestProfileImageUpdateDto.getUrl())
+                .addValue("size", requestProfileImageUpdateDto.getSize())
+                .addValue("isDeleted", requestProfileImageUpdateDto.getIsDeleted())
+                .addValue("isBlocked", requestProfileImageUpdateDto.getIsBlocked())
+                .addValue("isPrimary", requestProfileImageUpdateDto.getIsPrimary())
+                .addValue("isPrivate", requestProfileImageUpdateDto.getIsPrivate())
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(UPDATE_IMAGE, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_IMAGE,
                 parameters,
                 new ProfileImageEntityRowMapper()
         );
@@ -351,12 +376,15 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId)
                 .addValue("longitude", longitude) // долгота
-                .addValue("latitude", latitude); // широта
+                .addValue("latitude", latitude) // широта
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_NAVIGATOR, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
-                "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude\n"
+                "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
+                        + "created_at, updated_at\n"
                         + "FROM profile_navigators WHERE id = " + insertedId,
                 parameters,
                 new ProfileNavigatorEntityRowMapper()
@@ -371,7 +399,8 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId)
                 .addValue("longitude", longitude) // долгота
-                .addValue("latitude", latitude); // широта
+                .addValue("latitude", latitude) // широта
+                .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(
                 UPDATE_NAVIGATOR,
                 parameters
@@ -405,7 +434,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("ageTo", requestProfileFilterAddDto.getAgeTo())
                 .addValue("distance", requestProfileFilterAddDto.getDistance())
                 .addValue("page", requestProfileFilterAddDto.getPage())
-                .addValue("size", requestProfileFilterAddDto.getSize());
+                .addValue("size", requestProfileFilterAddDto.getSize())
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_FILTER, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
@@ -426,7 +457,8 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("ageTo", requestProfileFilterUpdateDto.getAgeTo())
                 .addValue("distance", requestProfileFilterUpdateDto.getDistance())
                 .addValue("page", requestProfileFilterUpdateDto.getPage())
-                .addValue("size", requestProfileFilterUpdateDto.getSize());
+                .addValue("size", requestProfileFilterUpdateDto.getSize())
+                .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(UPDATE_FILTER, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_FILTER,
@@ -458,7 +490,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("languageCode", requestProfileTelegramAddDto.getLanguageCode())
                 .addValue("allowsWriteToPm", requestProfileTelegramAddDto.getAllowsWriteToPm())
                 .addValue("queryId", requestProfileTelegramAddDto.getQueryId())
-                .addValue("chatId", requestProfileTelegramAddDto.getChatId());
+                .addValue("chatId", requestProfileTelegramAddDto.getChatId())
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_TELEGRAM, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
@@ -481,7 +515,8 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("languageCode", requestProfileTelegramUpdateDto.getLanguageCode())
                 .addValue("allowsWriteToPm", requestProfileTelegramUpdateDto.getAllowsWriteToPm())
                 .addValue("queryId", requestProfileTelegramUpdateDto.getQueryId())
-                .addValue("chatId", requestProfileTelegramUpdateDto.getChatId());
+                .addValue("chatId", requestProfileTelegramUpdateDto.getChatId())
+                .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(UPDATE_TELEGRAM, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_TELEGRAM,

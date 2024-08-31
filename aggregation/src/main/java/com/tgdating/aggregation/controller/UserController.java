@@ -27,14 +27,14 @@ public class UserController {
 
     @PutMapping
     @LogMethodExecutionTime
-    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
+//    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
     public ResponseEntity<UserRepresentation> updateUser(@RequestBody UserUpdateRecord userUpdateRecord) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.updateUser(userUpdateRecord));
     }
 
     @DeleteMapping("/{id}")
     @LogMethodExecutionTime
-    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
+//    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
@@ -42,7 +42,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @LogMethodExecutionTime
-    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
+//    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
     public ResponseEntity<UserRepresentation> getUserDetail(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserDetail(id));
     }
@@ -63,14 +63,14 @@ public class UserController {
 
     @GetMapping("/{id}/roles")
     @LogMethodExecutionTime
-    @PreAuthorize("hasAuthority('" + Authorities.ADMIN + "')")
+//    @PreAuthorize("hasAuthority('" + Authorities.ADMIN + "')")
     public ResponseEntity<?> getUserRoles(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserRoles(id));
     }
 
     @GetMapping("/{id}/groups")
     @LogMethodExecutionTime
-    @PreAuthorize("hasAuthority('" + Authorities.ADMIN + "')")
+//    @PreAuthorize("hasAuthority('" + Authorities.ADMIN + "')")
     public ResponseEntity<?> getUserGroups(@PathVariable String id) {
         return ResponseEntity.status(HttpStatus.OK).body(userService.getUserGroups(id));
     }

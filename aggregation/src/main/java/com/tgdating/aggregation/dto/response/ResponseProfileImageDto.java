@@ -1,11 +1,14 @@
-package com.tgdating.aggregation.dto.request;
+package com.tgdating.aggregation.dto.response;
 
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
-public class RequestProfileImageAddDto {
+public class ResponseProfileImageDto {
+    private Long id;
     private String sessionId;
     private String name;
     private String url;
@@ -14,4 +17,6 @@ public class RequestProfileImageAddDto {
     private Boolean isBlocked;
     private Boolean isPrimary;
     private Boolean isPrivate;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

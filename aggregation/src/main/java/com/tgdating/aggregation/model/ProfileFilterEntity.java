@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.time.LocalDateTime;
+
 @AllArgsConstructor
 @Data
 @Builder
@@ -17,4 +19,6 @@ public class ProfileFilterEntity {
     private Double distance;
     private Integer page;
     private Integer size;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
