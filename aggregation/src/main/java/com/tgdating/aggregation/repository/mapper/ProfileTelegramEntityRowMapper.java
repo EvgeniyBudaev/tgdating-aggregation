@@ -22,6 +22,7 @@ public class ProfileTelegramEntityRowMapper implements RowMapper<ProfileTelegram
                 rs.getBoolean("allows_write_to_pm"),
                 rs.getString("query_id"),
                 rs.getLong("chat_id"),
+                rs.getBoolean("is_deleted"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 Optional.ofNullable(rs.getTimestamp("updated_at"))
                         .map(Timestamp::toLocalDateTime).orElse(null)

@@ -44,6 +44,8 @@ public interface ProfileRepository {
 
     ProfileTelegramEntity updateTelegram(RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto);
 
+    ProfileTelegramEntity deleteTelegram(Long id);
+
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 
     ProfileLikeEntity addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);

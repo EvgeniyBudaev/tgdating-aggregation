@@ -474,6 +474,10 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.updateTelegram(requestProfileTelegramUpdateDto);
     }
 
+    private ProfileTelegramEntity deleteTelegram(Long id) {
+        return profileRepository.deleteTelegram(id);
+    }
+
     public ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude) {
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);

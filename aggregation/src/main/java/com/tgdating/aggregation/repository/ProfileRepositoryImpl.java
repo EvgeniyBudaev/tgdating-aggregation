@@ -140,21 +140,25 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String ADD_TELEGRAM =
             "INSERT INTO profile_telegram (session_id, user_id, username, first_name, last_name, language_code,\n"
-                    + "allows_write_to_pm, query_id, chat_id, created_at, updated_at)\n"
+                    + "allows_write_to_pm, query_id, chat_id, is_deleted, created_at, updated_at)\n"
                     + "VALUES (:sessionId, :userId, :username, :firstName, :lastName, :languageCode,\n"
-                    + ":allowsWriteToPm, :queryId, :chatId, :createdAt, :updatedAt)\n"
+                    + ":allowsWriteToPm, :queryId, :chatId, :isDeleted, :createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
     private static final String UPDATE_TELEGRAM =
             "UPDATE profile_telegram\n"
                     + "SET session_id=:sessionId, user_id=:userId, username=:username,\n"
                     + "first_name=:firstName, last_name=:lastName, language_code=:languageCode,\n"
-                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId, updated_at=:updatedAt\n"
+                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId,\n"
+                    + "is_deleted=:isDeleted, updated_at=:updatedAt\n"
                     + "WHERE session_id = :sessionId";
+
+    private static final String DELETE_TELEGRAM =
+            "UPDATE profile_telegram SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
 
     private static final String GET_TELEGRAM =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
-                    + "allows_write_to_pm, query_id, chat_id, created_at, updated_at\n"
+                    + "allows_write_to_pm, query_id, chat_id, is_deleted, created_at, updated_at\n"
                     + "FROM profile_telegram\n"
                     + "WHERE session_id = :sessionId";
 
@@ -491,6 +495,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("allowsWriteToPm", requestProfileTelegramAddDto.getAllowsWriteToPm())
                 .addValue("queryId", requestProfileTelegramAddDto.getQueryId())
                 .addValue("chatId", requestProfileTelegramAddDto.getChatId())
+                .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -516,8 +521,23 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("allowsWriteToPm", requestProfileTelegramUpdateDto.getAllowsWriteToPm())
                 .addValue("queryId", requestProfileTelegramUpdateDto.getQueryId())
                 .addValue("chatId", requestProfileTelegramUpdateDto.getChatId())
+                .addValue("isDeleted", false)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(UPDATE_TELEGRAM, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_TELEGRAM,
+                parameters,
+                new ProfileTelegramEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileTelegramEntity deleteTelegram(Long id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("isDeleted", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(DELETE_TELEGRAM, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_TELEGRAM,
                 parameters,

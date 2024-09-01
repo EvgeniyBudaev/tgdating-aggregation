@@ -20,6 +20,7 @@ public class ProfileTelegramEntity {
     private Boolean allowsWriteToPm;
     private String queryId;
     private Long chatId;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
