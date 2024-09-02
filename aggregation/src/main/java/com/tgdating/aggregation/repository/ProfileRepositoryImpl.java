@@ -120,21 +120,24 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String ADD_FILTER =
             "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
-                    + "size, created_at, updated_at)\n"
+                    + "size, is_deleted, created_at, updated_at)\n"
                     + "VALUES (:sessionId, :searchGender, :lookingFor, :ageFrom, :ageTo, :distance, :page, :size,\n"
-                    + ":createdAt, :updatedAt)\n"
+                    + ":isDeleted, :createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
     private static final String UPDATE_FILTER =
             "UPDATE profile_filters\n"
                     + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
                     + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size,\n"
-                    + "updated_at=:updatedAt\n"
+                    + "is_deleted=:isDeleted, updated_at=:updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
+    private static final String DELETE_FILTER =
+            "UPDATE profile_filters SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
+
     private static final String GET_FILTER =
-            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size, created_at,\n"
-                    + "updated_at\n"
+            "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size, is_deleted,\n"
+                    + "created_at, updated_at\n"
                     + "FROM profile_filters\n"
                     + "WHERE session_id = :sessionId";
 
@@ -439,6 +442,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("distance", requestProfileFilterAddDto.getDistance())
                 .addValue("page", requestProfileFilterAddDto.getPage())
                 .addValue("size", requestProfileFilterAddDto.getSize())
+                .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -462,8 +466,23 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("distance", requestProfileFilterUpdateDto.getDistance())
                 .addValue("page", requestProfileFilterUpdateDto.getPage())
                 .addValue("size", requestProfileFilterUpdateDto.getSize())
+                .addValue("isDeleted", false)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(UPDATE_FILTER, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_FILTER,
+                parameters,
+                new ProfileFilterEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileFilterEntity deleteFilter(Long id) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", id)
+                .addValue("isDeleted", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(DELETE_FILTER, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_FILTER,
                 parameters,

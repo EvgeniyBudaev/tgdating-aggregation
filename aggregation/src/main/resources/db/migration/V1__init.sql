@@ -57,9 +57,9 @@ CREATE TABLE IF NOT EXISTS profile_telegram
     allows_write_to_pm BOOL,
     query_id           TEXT,
     chat_id            BIGINT       NOT NULL,
-    is_deleted BOOL      NOT NULL DEFAULT false,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
+    is_deleted         BOOL         NOT NULL DEFAULT false,
+    created_at         TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at         TIMESTAMP    NULL,
     CONSTRAINT fk_profile_telegram_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
 );
 
@@ -86,8 +86,9 @@ CREATE TABLE IF NOT EXISTS profile_filters
     distance      REAL,
     page          INTEGER,
     size          INTEGER,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NULL,
+    is_deleted    BOOL      NOT NULL DEFAULT false,
+    created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at    TIMESTAMP NULL,
     CONSTRAINT fk_profile_filters_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)
 );
 

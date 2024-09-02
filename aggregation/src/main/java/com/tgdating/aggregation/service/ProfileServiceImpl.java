@@ -495,6 +495,10 @@ public class ProfileServiceImpl implements ProfileService {
         return getResponseProfileFilterDto(profileFilterEntity);
     }
 
+    private ProfileFilterEntity deleteFilter(Long id) {
+        return profileRepository.deleteFilter(id);
+    }
+
     private ResponseProfileFilterDto getResponseProfileFilterDto(ProfileFilterEntity profileFilterEntity) {
         ResponseProfileFilterDto responseProfileFilterDto = new ResponseProfileFilterDto();
         responseProfileFilterDto.setSessionId(profileFilterEntity.getSessionId());

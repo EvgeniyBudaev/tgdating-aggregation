@@ -38,6 +38,8 @@ public interface ProfileRepository {
 
     ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto);
 
+    ProfileFilterEntity deleteFilter(Long id);
+
     ProfileFilterEntity findFilterBySessionID(String sessionId);
 
     ProfileTelegramEntity addTelegram(RequestProfileTelegramAddDto requestProfileTelegramAddDto);

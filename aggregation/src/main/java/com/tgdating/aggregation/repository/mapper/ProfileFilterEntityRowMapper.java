@@ -21,6 +21,7 @@ public class ProfileFilterEntityRowMapper implements RowMapper<ProfileFilterEnti
                 rs.getDouble("distance"),
                 rs.getInt("page"),
                 rs.getInt("size"),
+                rs.getBoolean("is_deleted"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 Optional.ofNullable(rs.getTimestamp("updated_at"))
                         .map(Timestamp::toLocalDateTime).orElse(null)

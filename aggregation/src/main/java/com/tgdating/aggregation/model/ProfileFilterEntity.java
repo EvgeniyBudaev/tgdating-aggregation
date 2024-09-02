@@ -19,6 +19,7 @@ public class ProfileFilterEntity {
     private Double distance;
     private Integer page;
     private Integer size;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
