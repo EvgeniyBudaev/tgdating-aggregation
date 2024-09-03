@@ -31,6 +31,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "updated_at = :updatedAt, last_online = :lastOnline\n"
                     + "WHERE session_id = :sessionId";
 
+    private static final String DELETE_PROFILE =
+            "UPDATE profiles SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE session_id = :sessionId";
+
     private static final String GET_PROFILE_LIST_BY_SESSION_ID =
             "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height,\n"
                     + "p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible,\n"
@@ -66,7 +69,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "weight, is_deleted, is_blocked, is_premium, is_show_distance, is_invisible, created_at,\n"
                     + "updated_at, last_online\n"
                     + "FROM profiles\n"
-                    + "WHERE session_id = :sessionId AND is_deleted = false";
+                    + "WHERE session_id = :sessionId";
 
     private static final String UPDATE_LAST_ONLINE =
             "UPDATE profiles SET last_online = :lastOnline WHERE session_id = :sessionId";
@@ -89,13 +92,14 @@ public class ProfileRepositoryImpl implements ProfileRepository {
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
                     + "created_at, updated_at\n"
                     + "FROM profile_images\n"
-                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false";
+                    + "WHERE session_id = :sessionId AND is_deleted = false AND is_blocked = false";
 
     private static final String GET_IMAGE_PUBLIC_LIST =
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
                     + "created_at, updated_at\n"
                     + "FROM profile_images\n"
-                    + "WHERE session_id = :sessionId AND is_deleted=false AND is_blocked=false AND is_private=false";
+                    + "WHERE session_id = :sessionId AND is_deleted = false AND is_blocked = false AND\n"
+                    + "is_private = false";
 
     private static final String GET_IMAGE =
             "SELECT id, session_id, name, url, size, is_deleted, is_blocked, is_primary, is_private,\n"
@@ -105,17 +109,23 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
 
     private static final String ADD_NAVIGATOR =
-            "INSERT INTO profile_navigators (session_id, location, created_at, updated_at)\n"
-                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326), :createdAt,\n"
-                    + ":updatedAt) RETURNING id";
+            "INSERT INTO profile_navigators (session_id, location, is_deleted, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, ST_SetSRID(ST_MakePoint(:longitude, :latitude),  4326), :isDeleted,\n"
+                    + ":createdAt, :updatedAt) RETURNING id";
 
     private static final String UPDATE_NAVIGATOR =
             "UPDATE profile_navigators\n"
-                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), updated_at=:updatedAt\n"
+                    + "SET location = ST_SetSRID(ST_MakePoint(:longitude, :latitude), 4326), is_deleted = :isDeleted,\n"
+                    + "updated_at = :updatedAt\n"
+                    + "WHERE session_id = :sessionId";
+
+    private static final String DELETE_NAVIGATOR =
+            "UPDATE profile_navigators SET is_deleted = :isDeleted, updated_at = :updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String GET_NAVIGATOR =
-            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude, created_at, updated_at\n"
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude, is_deleted, created_at,\n"
+                    + "updated_at\n"
                     + "FROM profile_navigators WHERE session_id = :sessionId";
 
     private static final String ADD_FILTER =
@@ -127,13 +137,13 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String UPDATE_FILTER =
             "UPDATE profile_filters\n"
-                    + "SET session_id=:sessionId, search_gender=:searchGender, looking_for=:lookingFor,\n"
-                    + "age_from=:ageFrom, age_to=:ageTo, distance=:distance, page=:page, size=:size,\n"
-                    + "is_deleted=:isDeleted, updated_at=:updatedAt\n"
+                    + "SET session_id = :sessionId, search_gender = :searchGender, looking_for = :lookingFor,\n"
+                    + "age_from = :ageFrom, age_to = :ageTo, distance = :distance, page = :page, size = :size,\n"
+                    + "is_deleted = :isDeleted, updated_at = :updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String DELETE_FILTER =
-            "UPDATE profile_filters SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
+            "UPDATE profile_filters SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE session_id = :sessionId";
 
     private static final String GET_FILTER =
             "SELECT id, session_id, search_gender, looking_for, age_from, age_to, distance, page, size, is_deleted,\n"
@@ -150,14 +160,15 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String UPDATE_TELEGRAM =
             "UPDATE profile_telegram\n"
-                    + "SET session_id=:sessionId, user_id=:userId, username=:username,\n"
-                    + "first_name=:firstName, last_name=:lastName, language_code=:languageCode,\n"
-                    + "allows_write_to_pm=:allowsWriteToPm, query_id=:queryId, chat_id=:chatId,\n"
-                    + "is_deleted=:isDeleted, updated_at=:updatedAt\n"
+                    + "SET session_id = :sessionId, user_id = :userId, username = :username,\n"
+                    + "first_name = :firstName, last_name = :lastName, language_code = :languageCode,\n"
+                    + "allows_write_to_pm = :allowsWriteToPm, query_id = :queryId, chat_id = :chatId,\n"
+                    + "is_deleted = :isDeleted, updated_at = :updatedAt\n"
                     + "WHERE session_id = :sessionId";
 
     private static final String DELETE_TELEGRAM =
-            "UPDATE profile_telegram SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE id = :id";
+            "UPDATE profile_telegram SET is_deleted = :isDeleted, updated_at = :updatedAt\n"
+                    + "WHERE session_id = :sessionId";
 
     private static final String GET_TELEGRAM =
             "SELECT id, session_id, user_id, username, first_name, last_name, language_code,\n"
@@ -199,7 +210,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("lastOnline", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(CREATE_PROFILE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
-                "SELECT * FROM profiles WHERE session_id = :sessionId",
+                GET_PROFILE_BY_SESSION_ID,
                 parameters,
                 new ProfileEntityRowMapper()
         );
@@ -222,7 +233,21 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("lastOnline", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(UPDATE_PROFILE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
-                "SELECT * FROM profiles WHERE session_id = :sessionId",
+                GET_PROFILE_BY_SESSION_ID,
+                parameters,
+                new ProfileEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileEntity delete(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("isDeleted", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(DELETE_PROFILE, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_BY_SESSION_ID,
                 parameters,
                 new ProfileEntityRowMapper()
         );
@@ -384,6 +409,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("sessionId", sessionId)
                 .addValue("longitude", longitude) // долгота
                 .addValue("latitude", latitude) // широта
+                .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -391,7 +417,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
-                        + "created_at, updated_at\n"
+                        + "is_deleted, created_at, updated_at\n"
                         + "FROM profile_navigators WHERE id = " + insertedId,
                 parameters,
                 new ProfileNavigatorEntityRowMapper()
@@ -407,11 +433,26 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("sessionId", sessionId)
                 .addValue("longitude", longitude) // долгота
                 .addValue("latitude", latitude) // широта
+                .addValue("isDeleted", false)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(
                 UPDATE_NAVIGATOR,
                 parameters
         );
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_NAVIGATOR,
+                parameters,
+                new ProfileNavigatorEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileNavigatorEntity deleteNavigator(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("isDeleted", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(DELETE_NAVIGATOR, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_NAVIGATOR,
                 parameters,
@@ -477,9 +518,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public ProfileFilterEntity deleteFilter(Long id) {
+    public ProfileFilterEntity deleteFilter(String sessionId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("id", id)
+                .addValue("sessionId", sessionId)
                 .addValue("isDeleted", true)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(DELETE_FILTER, parameters);
@@ -551,9 +592,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public ProfileTelegramEntity deleteTelegram(Long id) {
+    public ProfileTelegramEntity deleteTelegram(String sessionId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("id", id)
+                .addValue("sessionId", sessionId)
                 .addValue("isDeleted", true)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(DELETE_TELEGRAM, parameters);

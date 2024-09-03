@@ -10,6 +10,8 @@ public interface ProfileRepository {
 
     ProfileEntity update(RequestProfileUpdateDto requestProfileUpdateDto);
 
+    ProfileEntity delete(String sessionId);
+
     PaginationEntity<List<ProfileListEntity>> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
     ProfileEntity findBySessionID(String sessionId);
@@ -32,13 +34,15 @@ public interface ProfileRepository {
 
     ProfileNavigatorEntity updateNavigator(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto);
 
+    ProfileNavigatorEntity deleteNavigator(String sessionId);
+
     ProfileNavigatorEntity findNavigatorBySessionID(String sessionId);
 
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
 
     ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto);
 
-    ProfileFilterEntity deleteFilter(Long id);
+    ProfileFilterEntity deleteFilter(String sessionId);
 
     ProfileFilterEntity findFilterBySessionID(String sessionId);
 
@@ -46,7 +50,7 @@ public interface ProfileRepository {
 
     ProfileTelegramEntity updateTelegram(RequestProfileTelegramUpdateDto requestProfileTelegramUpdateDto);
 
-    ProfileTelegramEntity deleteTelegram(Long id);
+    ProfileTelegramEntity deleteTelegram(String sessionId);
 
     ProfileTelegramEntity findTelegramBySessionID(String sessionId);
 

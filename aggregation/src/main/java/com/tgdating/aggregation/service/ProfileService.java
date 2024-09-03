@@ -12,6 +12,8 @@ public interface ProfileService {
 
     ResponseProfileUpdateDto update(RequestProfileUpdateDto requestProfileUpdateDto);
 
+    void delete(String sessionId);
+
     PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
     ResponseProfileBySessionIdGetDto getBySessionID(String sessionId, Double latitude, Double longitude);

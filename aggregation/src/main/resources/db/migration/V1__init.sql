@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS profile_navigators
     id         BIGSERIAL NOT NULL PRIMARY KEY,
     session_id VARCHAR   NOT NULL,
     location   geometry(Point, 4326),
+    is_deleted    BOOL      NOT NULL DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NULL,
     CONSTRAINT fk_profile_navigators_session_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)

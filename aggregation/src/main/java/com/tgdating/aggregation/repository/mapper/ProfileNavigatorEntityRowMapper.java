@@ -21,6 +21,7 @@ public class ProfileNavigatorEntityRowMapper implements RowMapper<ProfileNavigat
                 rs.getLong("id"),
                 rs.getString("session_id"),
                 location,
+                rs.getBoolean("is_deleted"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 Optional.ofNullable(rs.getTimestamp("updated_at"))
                         .map(Timestamp::toLocalDateTime).orElse(null)

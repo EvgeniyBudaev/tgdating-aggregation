@@ -41,6 +41,14 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.CREATED).body(profileService.update(requestProfileUpdateDto));
     }
 
+    @DeleteMapping
+    public ResponseEntity<?> deleteProfile(
+            @RequestBody String sessionId) {
+        System.out.println("controller deleteProfile: " + sessionId);
+        profileService.delete(sessionId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    }
+
     @GetMapping("/list")
     public ResponseEntity<PaginationEntity<List<ResponseProfileListGetDto>>> getProfileList(
             @RequestParam String sessionId,

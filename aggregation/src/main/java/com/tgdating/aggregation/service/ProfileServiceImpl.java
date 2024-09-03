@@ -128,13 +128,26 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
-    public PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(RequestProfileListGetDto requestProfileListGetDto) {
+    @Override
+    public void delete(String sessionId) {
+        ProfileEntity profileEntity = findBySessionID(sessionId);
+        checkUserExists(profileEntity.getIsDeleted());
+        profileRepository.delete(sessionId);
+        deleteFilter(sessionId);
+        deleteNavigator(sessionId);
+        deleteTelegram(sessionId);
+        deleteImageAllBySessionID(sessionId);
+    }
+
+    public PaginationEntity<List<ResponseProfileListGetDto>> getProfileList(
+            RequestProfileListGetDto requestProfileListGetDto) {
         String sessionId = requestProfileListGetDto.getSessionId();
         Double latitude = requestProfileListGetDto.getLatitude();
         Double longitude = requestProfileListGetDto.getLongitude();
         updateLastOnline(sessionId);
         updateNavigator(sessionId, latitude, longitude);
-        PaginationEntity<List<ProfileListEntity>> paginationProfileListEntity = profileRepository.findProfileList(requestProfileListGetDto);
+        PaginationEntity<List<ProfileListEntity>> paginationProfileListEntity =
+                profileRepository.findProfileList(requestProfileListGetDto);
         List<ProfileListEntity> profileListEntity = paginationProfileListEntity.getContent();
         List<ResponseProfileListGetDto> formattedList = profileListEntity.stream().map(item -> {
             String itemSessionId = item.getSessionId();
@@ -223,7 +236,8 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ResponseProfileDetailGetDto getProfileDetail(String sessionId, String viewerSessionId, Double latitude, Double longitude) {
+    public ResponseProfileDetailGetDto getProfileDetail(
+            String sessionId, String viewerSessionId, Double latitude, Double longitude) {
         updateLastOnline(viewerSessionId);
         updateNavigator(viewerSessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
@@ -305,6 +319,13 @@ public class ProfileServiceImpl implements ProfileService {
                 .toString();
         deleteFileFromFileSystem(filePath);
         return profileRepository.deleteImage(id);
+    }
+
+    private void deleteImageAllBySessionID(String sessionId) {
+        List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
+        for (ProfileImageEntity imageEntity : profileImageListEntity) {
+            deleteImage(imageEntity.getId());
+        }
     }
 
     private void updateLastOnline(String sessionId) {
@@ -401,7 +422,8 @@ public class ProfileServiceImpl implements ProfileService {
         );
     }
 
-    public ResponseProfileNavigatorDto updateCoordinates(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
+    public ResponseProfileNavigatorDto updateCoordinates(
+            RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto) {
         String sessionId = requestProfileNavigatorUpdateDto.getSessionId();
         Double latitude = requestProfileNavigatorUpdateDto.getLatitude();
         Double longitude = requestProfileNavigatorUpdateDto.getLongitude();
@@ -439,6 +461,10 @@ public class ProfileServiceImpl implements ProfileService {
         return null;
     }
 
+    private ProfileNavigatorEntity deleteNavigator(String sessionId) {
+        return profileRepository.deleteNavigator(sessionId);
+    }
+
     private ProfileFilterEntity addFilter(RequestProfileCreateDto requestProfileCreateDto) {
         return profileRepository.addFilter(
                 RequestProfileFilterAddDto.builder()
@@ -474,8 +500,8 @@ public class ProfileServiceImpl implements ProfileService {
         return profileRepository.updateTelegram(requestProfileTelegramUpdateDto);
     }
 
-    private ProfileTelegramEntity deleteTelegram(Long id) {
-        return profileRepository.deleteTelegram(id);
+    private ProfileTelegramEntity deleteTelegram(String sessionId) {
+        return profileRepository.deleteTelegram(sessionId);
     }
 
     public ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude) {
@@ -495,8 +521,8 @@ public class ProfileServiceImpl implements ProfileService {
         return getResponseProfileFilterDto(profileFilterEntity);
     }
 
-    private ProfileFilterEntity deleteFilter(Long id) {
-        return profileRepository.deleteFilter(id);
+    private ProfileFilterEntity deleteFilter(String sessionId) {
+        return profileRepository.deleteFilter(sessionId);
     }
 
     private ResponseProfileFilterDto getResponseProfileFilterDto(ProfileFilterEntity profileFilterEntity) {

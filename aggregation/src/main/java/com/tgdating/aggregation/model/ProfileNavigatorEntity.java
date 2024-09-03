@@ -13,6 +13,7 @@ public class ProfileNavigatorEntity {
     private Long id;
     private String sessionId;
     private PointEntity location;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
