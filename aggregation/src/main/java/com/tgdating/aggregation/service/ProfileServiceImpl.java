@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
@@ -322,9 +323,18 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     private void deleteImageAllBySessionID(String sessionId) {
-        List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
-        for (ProfileImageEntity imageEntity : profileImageListEntity) {
-            deleteImage(imageEntity.getId());
+        try {
+            List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
+            for (ProfileImageEntity imageEntity : profileImageListEntity) {
+                deleteImage(imageEntity.getId());
+            }
+            Path directoryPath = Paths.get(BASE_PROJECT_PATH.toString(), "src", "main", "resources", "static", "images", sessionId);
+            Files.deleteIfExists(directoryPath);
+        } catch (Exception e) {
+            throw new InternalServerException(
+                    "Ошибка удаления директории",
+                    "Unexpected error occurred while deleting directory: " + e.getMessage()
+            );
         }
     }
 
@@ -356,7 +366,7 @@ public class ProfileServiceImpl implements ProfileService {
             String fileName = file.getOriginalFilename();
             String filePath = String.format("%s/%s/%s", staticFolderPath, sessionId, fileName);
             File directory = new File(filePath).getParentFile();
-            if (!directory.exists()) directory.mkdirs();
+            if (!directory.exists()) directory.mkdirs(); // if (!Files.exists(staticFolderPath)) Files.createDirectories(staticFolderPath);
             file.transferTo(new File(filePath));
             return ImageConverter.convertImage(filePath, fileName);
         } catch (Exception e) {

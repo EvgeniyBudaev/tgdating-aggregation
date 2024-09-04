@@ -1,8 +1,10 @@
 package com.tgdating.aggregation.controller;
 
 import com.tgdating.aggregation.aspect.LogMethodExecutionTime;
+import com.tgdating.aggregation.dto.response.ResponseDto;
 import com.tgdating.aggregation.dto.response.ResponseUserDto;
 import com.tgdating.aggregation.model.UserCreateRecord;
+import com.tgdating.aggregation.model.UserDeleteRecord;
 import com.tgdating.aggregation.model.UserUpdateRecord;
 import com.tgdating.aggregation.service.UserService;
 import com.tgdating.aggregation.shared.security.Authorities;
@@ -32,12 +34,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.updateUser(userUpdateRecord));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping()
     @LogMethodExecutionTime
 //    @PreAuthorize("hasAuthority('" + Authorities.CUSTOMER + "')")
-    public ResponseEntity<?> deleteUser(@PathVariable String id) {
-        userService.deleteUser(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<ResponseDto> deleteUser(@RequestBody UserDeleteRecord userDeleteRecord) {
+        System.out.println("controller deleteUser: " + userDeleteRecord);
+        userService.deleteUser(userDeleteRecord.id());
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.builder().success(true).build());
     }
 
     @GetMapping("/{id}")

@@ -42,11 +42,11 @@ public class ProfileController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteProfile(
-            @RequestBody String sessionId) {
-        System.out.println("controller deleteProfile: " + sessionId);
-        profileService.delete(sessionId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<ResponseDto> deleteProfile(
+            @RequestBody RequestProfileDeleteDto requestProfileDeleteDto) {
+        System.out.println("controller deleteProfile: " + requestProfileDeleteDto.getSessionId());
+        profileService.delete(requestProfileDeleteDto.getSessionId());
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.builder().success(true).build());
     }
 
     @GetMapping("/list")

@@ -14,6 +14,7 @@ public class ProfileLikeEntity {
     private String sessionId;
     private String likedSessionId;
     private Boolean isLiked;
+    private Boolean isDeleted;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

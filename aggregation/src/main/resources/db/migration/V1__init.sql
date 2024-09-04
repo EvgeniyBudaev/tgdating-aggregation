@@ -99,6 +99,7 @@ CREATE TABLE IF NOT EXISTS profile_likes
     session_id       VARCHAR   NOT NULL,
     liked_session_id VARCHAR   NOT NULL,
     is_liked         BOOL      NOT NULL DEFAULT false,
+    is_deleted    BOOL      NOT NULL DEFAULT false,
     created_at       TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at       TIMESTAMP NULL,
     CONSTRAINT fk_profile_likes_profile_id FOREIGN KEY (session_id) REFERENCES profiles (session_id)

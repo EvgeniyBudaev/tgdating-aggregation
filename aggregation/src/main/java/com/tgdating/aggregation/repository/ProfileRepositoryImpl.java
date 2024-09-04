@@ -177,12 +177,12 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "WHERE session_id = :sessionId";
 
     private static final String ADD_LIKE =
-            "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, created_at, updated_at\n"
-                    + "VALUES (:sessionId, :liked_session_id, :is_liked, :created_at, :updated_at)\n"
+            "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, is_deleted, created_at, updated_at\n"
+                    + "VALUES (:sessionId, :liked_session_id, :is_liked, :isDeleted, :created_at, :updated_at)\n"
                     + "RETURNING id";
 
     private static final String GET_LIKE =
-            "SELECT id, session_id, liked_session_id, is_liked, created_at, updated_at\n"
+            "SELECT id, session_id, liked_session_id, is_liked, is_deleted, created_at, updated_at\n"
                     + "FROM profile_likes\n"
                     + "WHERE session_id = :sessionId AND liked_session_id = :likedSessionId";
 
@@ -622,6 +622,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("sessionId", requestProfileLikeAddDto.getSessionId())
                 .addValue("likedSessionId", requestProfileLikeAddDto.getLikedSessionId())
                 .addValue("isLiked", true)
+                .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();

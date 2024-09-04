@@ -16,6 +16,7 @@ public class ProfileLikeEntityRowMapper implements RowMapper<ProfileLikeEntity> 
                 rs.getString("session_id"),
                 rs.getString("liked_session_id"),
                 rs.getBoolean("is_liked"),
+                rs.getBoolean("is_deleted"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
                 Optional.ofNullable(rs.getTimestamp("updated_at"))
                         .map(Timestamp::toLocalDateTime).orElse(null)
