@@ -458,6 +458,11 @@ public class ProfileServiceImpl implements ProfileService {
                 .build();
     }
 
+    @Override
+    public ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto) {
+        return profileRepository.addBlock(requestProfileBlockAddDto);
+    }
+
     private ProfileNavigatorEntity updateNavigator(String sessionId, Double latitude, Double longitude) {
         if (latitude != null && longitude != null) {
             return profileRepository.updateNavigator(

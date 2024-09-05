@@ -57,4 +57,6 @@ public interface ProfileRepository {
     ProfileLikeEntity addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
 
     ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId);
+
+    ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto);
 }

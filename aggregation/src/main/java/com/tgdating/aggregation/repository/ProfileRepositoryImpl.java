@@ -177,8 +177,8 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "WHERE session_id = :sessionId";
 
     private static final String ADD_LIKE =
-            "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, is_deleted, created_at, updated_at\n"
-                    + "VALUES (:sessionId, :liked_session_id, :is_liked, :isDeleted, :created_at, :updated_at)\n"
+            "INSERT INTO profile_likes (session_id, liked_session_id, is_liked, is_deleted, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, :liked_session_id, :is_liked, :isDeleted, :createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
     private static final String GET_LIKE =
@@ -186,6 +186,10 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "FROM profile_likes\n"
                     + "WHERE session_id = :sessionId AND liked_session_id = :likedSessionId";
 
+    private static final String ADD_BLOCK =
+            "INSERT INTO profile_blocks (session_id, blocked_user_session_id, is_blocked, created_at, updated_at)\n"
+                    + "VALUES (:sessionId, :blockedUserSessionId, :isBlocked, :createdAt, :updatedAt)\n"
+                    + "RETURNING id";
 
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
@@ -649,5 +653,24 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
+    }
+
+    @Override
+    public ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileBlockAddDto.getSessionId())
+                .addValue("blockedUserSessionId", requestProfileBlockAddDto.getBlockedUserSessionId())
+                .addValue("isBlocked", true)
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        System.out.println("parameters: " + parameters);
+        namedParameterJdbcTemplate.update(ADD_BLOCK, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_blocks WHERE id = " + insertedId,
+                parameters,
+                new ProfileBlockEntityRowMapper()
+        );
     }
 }

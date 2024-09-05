@@ -3,6 +3,7 @@ package com.tgdating.aggregation.controller;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
+import com.tgdating.aggregation.model.ProfileBlockEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.service.ProfileService;
 import com.tgdating.aggregation.shared.Constants;
@@ -164,5 +165,14 @@ public class ProfileController {
         System.out.println("controller addLike sessionId: " + requestProfileLikeAddDto.getSessionId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.addLike(requestProfileLikeAddDto));
+    }
+
+    @PostMapping("/blocks")
+    public ResponseEntity<ProfileBlockEntity> addBlock(
+            @RequestBody RequestProfileBlockAddDto requestProfileBlockAddDto
+    ) {
+        System.out.println("controller addBlock sessionId: " + requestProfileBlockAddDto.getSessionId());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(profileService.addBlock(requestProfileBlockAddDto));
     }
 }

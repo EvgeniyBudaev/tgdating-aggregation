@@ -3,6 +3,7 @@ package com.tgdating.aggregation.service;
 import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
+import com.tgdating.aggregation.model.ProfileBlockEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
 
 import java.util.List;
@@ -32,4 +33,6 @@ public interface ProfileService {
     ResponseProfileNavigatorDto updateCoordinates(RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto);
 
     ResponseProfileLikeDto addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
+
+    ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto);
 }
