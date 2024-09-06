@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private static final Path BASE_PROJECT_PATH = Paths.get(System.getProperty("user.dir"));
-    private static final Integer MIN_DISTANCE = 50;
+    private static final Integer MIN_DISTANCE = 100;
 
     public ProfileServiceImpl(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
@@ -243,6 +243,12 @@ public class ProfileServiceImpl implements ProfileService {
         updateNavigator(viewerSessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
         checkUserExists(profileEntity.getIsDeleted());
+        ProfileNavigatorEntity profileNavigatorSessionEntity = findNavigatorBySessionID(sessionId);
+        ProfileNavigatorEntity profileNavigatorViewerEntity = findNavigatorBySessionID(viewerSessionId);
+        ProfileNavigatorDetailEntity profileNavigatorDetailEntity = profileRepository.findNavigatorBetweenSessionIDAndViewerSessionID(
+                profileNavigatorSessionEntity, profileNavigatorViewerEntity);
+        double distanceValue = profileNavigatorDetailEntity.getDistance();
+        Integer distanceAsInt = (int) Math.floor(distanceValue < MIN_DISTANCE ? MIN_DISTANCE : distanceValue);
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
         Optional<ProfileLikeEntity> profileLikeEntity =
@@ -266,6 +272,9 @@ public class ProfileServiceImpl implements ProfileService {
                 .createdAt(profileEntity.getCreatedAt())
                 .updatedAt(profileEntity.getUpdatedAt())
                 .lastOnline(profileEntity.getLastOnline())
+                .navigator(ResponseProfileDetailNavigatorDto.builder()
+                        .distance(distanceAsInt)
+                        .build())
                 .telegram(ResponseProfileTelegramDto.builder()
                         .sessionId(profileTelegramEntity.getSessionId())
                         .userId(profileTelegramEntity.getUserId())

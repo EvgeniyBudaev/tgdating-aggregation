@@ -128,6 +128,12 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "updated_at\n"
                     + "FROM profile_navigators WHERE session_id = :sessionId";
 
+    private static final String GET_NAVIGATOR_BETWEEN_SESSION_AND_VIEWER =
+            "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
+                    + "ST_DistanceSphere(ST_SetSRID(ST_MakePoint(:longitudeViewer, :latitudeViewer),  4326),\n"
+                        + "ST_SetSRID(ST_MakePoint(:longitudeSession, :latitudeSession),  4326)) as distance\n"
+                    + "FROM profile_navigators WHERE session_id = :sessionId";
+
     private static final String ADD_FILTER =
             "INSERT INTO profile_filters (session_id, search_gender, looking_for, age_from, age_to, distance, page,\n"
                     + "size, is_deleted, created_at, updated_at)\n"
@@ -475,6 +481,22 @@ public class ProfileRepositoryImpl implements ProfileRepository {
         );
     }
 
+    @Override
+    public ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewerSessionID(
+            ProfileNavigatorEntity profileNavigatorSessionEntity, ProfileNavigatorEntity profileNavigatorViewerEntity) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", profileNavigatorSessionEntity.getSessionId())
+                .addValue("latitudeSession", profileNavigatorSessionEntity.getLocation().getLatitude())
+                .addValue("longitudeSession", profileNavigatorSessionEntity.getLocation().getLongitude())
+                .addValue("latitudeViewer", profileNavigatorViewerEntity.getLocation().getLatitude())
+                .addValue("longitudeViewer", profileNavigatorViewerEntity.getLocation().getLongitude());
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_NAVIGATOR_BETWEEN_SESSION_AND_VIEWER,
+                parameters,
+                new ProfileNavigatorDetailEntityRowMapper()
+        );
+    }
+
     @Transactional
     @Override
     public ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto) {
@@ -664,7 +686,6 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        System.out.println("parameters: " + parameters);
         namedParameterJdbcTemplate.update(ADD_BLOCK, parameters, keyHolder);
         long insertedId = keyHolder.getKey().longValue();
         return namedParameterJdbcTemplate.queryForObject(

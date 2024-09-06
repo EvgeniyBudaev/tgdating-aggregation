@@ -38,6 +38,9 @@ public interface ProfileRepository {
 
     ProfileNavigatorEntity findNavigatorBySessionID(String sessionId);
 
+    ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewerSessionID(
+            ProfileNavigatorEntity profileNavigatorSessionEntity, ProfileNavigatorEntity profileNavigatorViewerEntity);
+
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
 
     ProfileFilterEntity updateFilter(RequestProfileFilterUpdateDto requestProfileFilterUpdateDto);
