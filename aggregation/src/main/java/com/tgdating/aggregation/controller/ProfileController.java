@@ -4,6 +4,7 @@ import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileBlockEntity;
+import com.tgdating.aggregation.model.ProfileComplaintEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.service.ProfileService;
 import com.tgdating.aggregation.shared.Constants;
@@ -45,7 +46,7 @@ public class ProfileController {
     @DeleteMapping
     public ResponseEntity<ResponseDto> deleteProfile(
             @RequestBody RequestProfileDeleteDto requestProfileDeleteDto) {
-        System.out.println("controller deleteProfile: " + requestProfileDeleteDto.getSessionId());
+        System.out.println("controller deleteProfile: " + requestProfileDeleteDto);
         profileService.delete(requestProfileDeleteDto.getSessionId());
         return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.builder().success(true).build());
     }
@@ -144,7 +145,7 @@ public class ProfileController {
     public ResponseEntity<ResponseProfileNavigatorDto> updateCoordinates(
             @RequestBody RequestProfileNavigatorUpdateDto requestProfileNavigatorUpdateDto
     ) {
-        System.out.println("controller updateNavigator sessionId: " + requestProfileNavigatorUpdateDto.getSessionId());
+        System.out.println("controller updateNavigator: " + requestProfileNavigatorUpdateDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.updateCoordinates(requestProfileNavigatorUpdateDto));
     }
@@ -153,7 +154,7 @@ public class ProfileController {
     public ResponseEntity<ResponseProfileFilterDto> updateFilter(
             @RequestBody RequestProfileFilterUpdateDto requestProfileFilterUpdateDto
     ) {
-        System.out.println("controller updateFilter sessionId: " + requestProfileFilterUpdateDto.getSessionId());
+        System.out.println("controller updateFilter: " + requestProfileFilterUpdateDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.updateFilter(requestProfileFilterUpdateDto));
     }
@@ -162,7 +163,7 @@ public class ProfileController {
     public ResponseEntity<ResponseProfileLikeDto> addLike(
             @RequestBody RequestProfileLikeAddDto requestProfileLikeAddDto
     ) {
-        System.out.println("controller addLike sessionId: " + requestProfileLikeAddDto.getSessionId());
+        System.out.println("controller addLike: " + requestProfileLikeAddDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.addLike(requestProfileLikeAddDto));
     }
@@ -171,8 +172,17 @@ public class ProfileController {
     public ResponseEntity<ProfileBlockEntity> addBlock(
             @RequestBody RequestProfileBlockAddDto requestProfileBlockAddDto
     ) {
-        System.out.println("controller addBlock sessionId: " + requestProfileBlockAddDto.getSessionId());
+        System.out.println("controller addBlock: " + requestProfileBlockAddDto);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(profileService.addBlock(requestProfileBlockAddDto));
+    }
+
+    @PostMapping("/complaints")
+    public ResponseEntity<ProfileComplaintEntity> addComplaint(
+            @RequestBody RequestProfileComplaintAddDto requestProfileComplaintAddDto
+    ) {
+        System.out.println("controller addComplaint: " + requestProfileComplaintAddDto);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(profileService.addComplaint(requestProfileComplaintAddDto));
     }
 }

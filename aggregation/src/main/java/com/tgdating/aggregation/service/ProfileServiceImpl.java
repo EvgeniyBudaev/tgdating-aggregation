@@ -26,13 +26,14 @@ public class ProfileServiceImpl implements ProfileService {
     private final ProfileRepository profileRepository;
     private static final Path BASE_PROJECT_PATH = Paths.get(System.getProperty("user.dir"));
     private static final Integer MIN_DISTANCE = 100;
+    private static final Integer MAX_COUNT_COMPLAINTS = 1;
 
     public ProfileServiceImpl(ProfileRepository profileRepository) {
         this.profileRepository = profileRepository;
     }
 
     public ResponseProfileCreateDto create(RequestProfileCreateDto requestProfileCreateDto) {
-        ProfileEntity profileEntity = profileRepository.create(requestProfileCreateDto);
+        ProfileEntity profileEntity = profileRepository.createProfile(requestProfileCreateDto);
         addImages(requestProfileCreateDto);
         addNavigator(requestProfileCreateDto);
         addFilter(requestProfileCreateDto);
@@ -75,7 +76,7 @@ public class ProfileServiceImpl implements ProfileService {
         updateNavigator(sessionId, latitude, longitude);
         updateFilter(requestProfileFilterUpdateDto);
         updateTelegram(requestProfileTelegramUpdateDto);
-        ProfileEntity profileEntity = profileRepository.update(requestProfileUpdateDto);
+        ProfileEntity profileEntity = profileRepository.updateProfile(requestProfileUpdateDto);
         checkUserExists(profileEntity.getIsDeleted());
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileNavigatorEntity profileNavigatorEntity = findNavigatorBySessionID(sessionId);
@@ -133,7 +134,7 @@ public class ProfileServiceImpl implements ProfileService {
     public void delete(String sessionId) {
         ProfileEntity profileEntity = findBySessionID(sessionId);
         checkUserExists(profileEntity.getIsDeleted());
-        profileRepository.delete(sessionId);
+        profileRepository.deleteProfile(sessionId);
         deleteFilter(sessionId);
         deleteNavigator(sessionId);
         deleteTelegram(sessionId);
@@ -470,6 +471,23 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto) {
         return profileRepository.addBlock(requestProfileBlockAddDto);
+    }
+
+    @Override
+    public ProfileComplaintEntity addComplaint(RequestProfileComplaintAddDto requestProfileComplaintAddDto) {
+        String sessionId = requestProfileComplaintAddDto.getSessionId();
+        String criminalSessionId = requestProfileComplaintAddDto.getCriminalSessionId();
+        RequestProfileBlockAddDto requestProfileBlockAddDto = RequestProfileBlockAddDto.builder()
+                .sessionId(sessionId)
+                .blockedUserSessionId(criminalSessionId)
+                .build();
+        profileRepository.addBlock(requestProfileBlockAddDto);
+        ProfileComplaintEntity profileComplaintEntity = profileRepository.addComplaint(requestProfileComplaintAddDto);
+        Integer countComplaints = profileRepository.countComplaintsByCurrentMonthAndSessionID(criminalSessionId);
+        if (countComplaints > MAX_COUNT_COMPLAINTS) {
+            profileRepository.blockProfile(criminalSessionId);
+        }
+        return profileComplaintEntity;
     }
 
     private ProfileNavigatorEntity updateNavigator(String sessionId, Double latitude, Double longitude) {

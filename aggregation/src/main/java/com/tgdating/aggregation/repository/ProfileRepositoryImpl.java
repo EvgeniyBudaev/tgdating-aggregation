@@ -34,6 +34,9 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     private static final String DELETE_PROFILE =
             "UPDATE profiles SET is_deleted = :isDeleted, updated_at = :updatedAt WHERE session_id = :sessionId";
 
+    private static final String BLOCK_PROFILE =
+            "UPDATE profiles SET is_blocked = :isBlocked, updated_at = :updatedAt WHERE session_id = :sessionId";
+
     private static final String GET_PROFILE_LIST_BY_SESSION_ID =
             "SELECT p.id, p.session_id, p.display_name, p.birthday, p.gender, p.location, p.description, p.height,\n"
                     + "p.weight, p.is_deleted, p.is_blocked, p.is_premium, p.is_show_distance, p.is_invisible,\n"
@@ -131,7 +134,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     private static final String GET_NAVIGATOR_BETWEEN_SESSION_AND_VIEWER =
             "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
                     + "ST_DistanceSphere(ST_SetSRID(ST_MakePoint(:longitudeViewer, :latitudeViewer),  4326),\n"
-                        + "ST_SetSRID(ST_MakePoint(:longitudeSession, :latitudeSession),  4326)) as distance\n"
+                    + "ST_SetSRID(ST_MakePoint(:longitudeSession, :latitudeSession),  4326)) as distance\n"
                     + "FROM profile_navigators WHERE session_id = :sessionId";
 
     private static final String ADD_FILTER =
@@ -197,13 +200,28 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                     + "VALUES (:sessionId, :blockedUserSessionId, :isBlocked, :createdAt, :updatedAt)\n"
                     + "RETURNING id";
 
+    private static final String ADD_COMPLAINT =
+            "INSERT INTO profile_complaints (session_id, complaint_session_id, reason, is_deleted, created_at,\n"
+                    + "updated_at)\n"
+                    + "VALUES (:sessionId, :complaintSessionId, :reason, :isDeleted, :createdAt, :updatedAt)\n"
+                    + "RETURNING id";
+
+    private static final String GET_COUNT_COMPLAINTS_BY_SESSION =
+            "SELECT count(*) AS count\n"
+                    + "FROM profile_complaints\n"
+                    + "WHERE criminal_session_id = :criminalSessionId AND\n"
+                    + "EXTRACT(\n"
+                    + "YEAR FROM created_at) = EXTRACT(YEAR FROM now() AND\n"
+                    + "EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM now()))";
+
+
     public ProfileRepositoryImpl(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     @Transactional
     @Override
-    public ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto) {
+    public ProfileEntity createProfile(RequestProfileCreateDto requestProfileCreateDto) {
         Double height = requestProfileCreateDto.getHeight() != null ? requestProfileCreateDto.getHeight() : 0.0;
         Double weight = requestProfileCreateDto.getWeight() != null ? requestProfileCreateDto.getWeight() : 0.0;
         MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -227,7 +245,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public ProfileEntity update(RequestProfileUpdateDto requestProfileUpdateDto) {
+    public ProfileEntity updateProfile(RequestProfileUpdateDto requestProfileUpdateDto) {
         Double height = requestProfileUpdateDto.getHeight() != null ? requestProfileUpdateDto.getHeight() : 0.0;
         Double weight = requestProfileUpdateDto.getWeight() != null ? requestProfileUpdateDto.getWeight() : 0.0;
         MapSqlParameterSource parameters = new MapSqlParameterSource()
@@ -250,12 +268,26 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public ProfileEntity delete(String sessionId) {
+    public ProfileEntity deleteProfile(String sessionId) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", sessionId)
                 .addValue("isDeleted", true)
                 .addValue("updatedAt", Utils.getNowUtc());
         namedParameterJdbcTemplate.update(DELETE_PROFILE, parameters);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_PROFILE_BY_SESSION_ID,
+                parameters,
+                new ProfileEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileEntity blockProfile(String sessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", sessionId)
+                .addValue("isBlocked", true)
+                .addValue("updatedAt", Utils.getNowUtc());
+        namedParameterJdbcTemplate.update(BLOCK_PROFILE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 GET_PROFILE_BY_SESSION_ID,
                 parameters,
@@ -692,6 +724,36 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 "SELECT * FROM profile_blocks WHERE id = " + insertedId,
                 parameters,
                 new ProfileBlockEntityRowMapper()
+        );
+    }
+
+    @Override
+    public ProfileComplaintEntity addComplaint(RequestProfileComplaintAddDto requestProfileComplaintAddDto) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("sessionId", requestProfileComplaintAddDto.getSessionId())
+                .addValue("complaintSessionId", requestProfileComplaintAddDto.getCriminalSessionId())
+                .addValue("reason", requestProfileComplaintAddDto.getReason())
+                .addValue("isDeleted", false)
+                .addValue("createdAt", Utils.getNowUtc())
+                .addValue("updatedAt", null);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        namedParameterJdbcTemplate.update(ADD_COMPLAINT, parameters, keyHolder);
+        long insertedId = keyHolder.getKey().longValue();
+        return namedParameterJdbcTemplate.queryForObject(
+                "SELECT * FROM profile_complaints WHERE id = " + insertedId,
+                parameters,
+                new ProfileComplaintEntityRowMapper()
+        );
+    }
+
+    @Override
+    public Integer countComplaintsByCurrentMonthAndSessionID(String criminalSessionId) {
+        MapSqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("criminalSessionId", criminalSessionId);
+        return namedParameterJdbcTemplate.queryForObject(
+                GET_COUNT_COMPLAINTS_BY_SESSION,
+                parameters,
+                Integer.class
         );
     }
 }

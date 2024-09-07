@@ -6,11 +6,13 @@ import com.tgdating.aggregation.model.*;
 import java.util.List;
 
 public interface ProfileRepository {
-    ProfileEntity create(RequestProfileCreateDto requestProfileCreateDto);
+    ProfileEntity createProfile(RequestProfileCreateDto requestProfileCreateDto);
 
-    ProfileEntity update(RequestProfileUpdateDto requestProfileUpdateDto);
+    ProfileEntity updateProfile(RequestProfileUpdateDto requestProfileUpdateDto);
 
-    ProfileEntity delete(String sessionId);
+    ProfileEntity deleteProfile(String sessionId);
+
+    ProfileEntity blockProfile(String sessionId);
 
     PaginationEntity<List<ProfileListEntity>> findProfileList(RequestProfileListGetDto requestProfileListGetDto);
 
@@ -62,4 +64,8 @@ public interface ProfileRepository {
     ProfileLikeEntity findLikeBySessionID(String sessionId, String likedSessionId);
 
     ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto);
+
+    ProfileComplaintEntity addComplaint(RequestProfileComplaintAddDto requestProfileComplaintAddDto);
+
+    Integer countComplaintsByCurrentMonthAndSessionID(String sessionId);
 }

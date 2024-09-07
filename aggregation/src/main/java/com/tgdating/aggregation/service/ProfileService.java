@@ -4,6 +4,7 @@ import com.tgdating.aggregation.dto.request.*;
 import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileBlockEntity;
+import com.tgdating.aggregation.model.ProfileComplaintEntity;
 import com.tgdating.aggregation.model.ProfileImageEntity;
 
 import java.util.List;
@@ -35,4 +36,6 @@ public interface ProfileService {
     ResponseProfileLikeDto addLike(RequestProfileLikeAddDto requestProfileLikeAddDto);
 
     ProfileBlockEntity addBlock(RequestProfileBlockAddDto requestProfileBlockAddDto);
+
+    ProfileComplaintEntity addComplaint(RequestProfileComplaintAddDto requestProfileComplaintAddDto);
 }

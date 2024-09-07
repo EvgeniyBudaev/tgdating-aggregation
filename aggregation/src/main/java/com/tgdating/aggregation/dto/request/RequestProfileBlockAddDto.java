@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class RequestProfileBlockAddDto {
-    private String sessionId;
-    private String blockedUserSessionId;
+    private String sessionId; // id того кто блокирует
+    private String blockedUserSessionId; // id того кого блокируем
 }
