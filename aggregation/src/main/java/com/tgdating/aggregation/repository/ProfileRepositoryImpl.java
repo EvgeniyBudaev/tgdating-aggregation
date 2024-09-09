@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class ProfileRepositoryImpl implements ProfileRepository {
@@ -364,9 +365,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isPrivate", requestProfileImageAddDto.getIsPrivate())
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_IMAGE, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_IMAGE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_images WHERE id = " + insertedId,
                 parameters,
@@ -454,9 +453,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_NAVIGATOR, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_NAVIGATOR, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
                         + "is_deleted, created_at, updated_at\n"
@@ -544,9 +541,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_FILTER, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_FILTER, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_filters WHERE id = " + insertedId,
                 parameters,
@@ -616,9 +611,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_TELEGRAM, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_TELEGRAM, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_telegram WHERE id = " + insertedId,
                 parameters,
@@ -683,9 +676,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isDeleted", false)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_LIKE, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_LIKE, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_likes WHERE id = " + insertedId,
                 parameters,
@@ -717,9 +708,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("isBlocked", true)
                 .addValue("createdAt", Utils.getNowUtc())
                 .addValue("updatedAt", null);
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        namedParameterJdbcTemplate.update(ADD_BLOCK, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        int insertedId = namedParameterJdbcTemplate.update(ADD_BLOCK, parameters);
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_blocks WHERE id = " + insertedId,
                 parameters,
@@ -738,7 +727,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
                 .addValue("updatedAt", null);
         KeyHolder keyHolder = new GeneratedKeyHolder();
         namedParameterJdbcTemplate.update(ADD_COMPLAINT, parameters, keyHolder);
-        long insertedId = keyHolder.getKey().longValue();
+        long insertedId = Objects.requireNonNull(keyHolder.getKey()).longValue();
         return namedParameterJdbcTemplate.queryForObject(
                 "SELECT * FROM profile_complaints WHERE id = " + insertedId,
                 parameters,
