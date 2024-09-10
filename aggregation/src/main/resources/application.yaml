@@ -5,6 +5,10 @@ spring:
     password: ${POSTGRES_PASSWORD}
     driverClassName: org.postgresql.Driver
 
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+
   # V(version)__description.sql
   flyway:
     enabled: true
