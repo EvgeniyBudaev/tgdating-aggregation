@@ -1,7 +1,5 @@
 package com.tgdating.aggregation.shared.utils;
 
-import com.tgdating.aggregation.model.BirthdateRangeRecord;
-
 import java.time.*;
 
 public class Utils {
