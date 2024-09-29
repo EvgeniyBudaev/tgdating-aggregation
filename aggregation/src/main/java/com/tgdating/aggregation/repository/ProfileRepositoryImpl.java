@@ -134,7 +134,7 @@ public class ProfileRepositoryImpl implements ProfileRepository {
 
     private static final String GET_NAVIGATOR_BETWEEN_SESSION_AND_VIEWER =
             "SELECT id, session_id, ST_X(location) as longitude, ST_Y(location) as latitude,\n"
-                    + "ST_DistanceSphere(ST_SetSRID(ST_MakePoint(:longitudeViewer, :latitudeViewer),  4326),\n"
+                    + "ST_DistanceSphere(ST_SetSRID(ST_MakePoint(:longitudeViewed, :latitudeViewed),  4326),\n"
                     + "ST_SetSRID(ST_MakePoint(:longitudeSession, :latitudeSession),  4326)) as distance\n"
                     + "FROM profile_navigators WHERE session_id = :sessionId";
 
@@ -511,14 +511,14 @@ public class ProfileRepositoryImpl implements ProfileRepository {
     }
 
     @Override
-    public ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewerSessionID(
-            ProfileNavigatorEntity profileNavigatorSessionEntity, ProfileNavigatorEntity profileNavigatorViewerEntity) {
+    public ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewedSessionID(
+            ProfileNavigatorEntity profileNavigatorSessionEntity, ProfileNavigatorEntity profileNavigatorViewedEntity) {
         MapSqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("sessionId", profileNavigatorSessionEntity.getSessionId())
                 .addValue("latitudeSession", profileNavigatorSessionEntity.getLocation().getLatitude())
                 .addValue("longitudeSession", profileNavigatorSessionEntity.getLocation().getLongitude())
-                .addValue("latitudeViewer", profileNavigatorViewerEntity.getLocation().getLatitude())
-                .addValue("longitudeViewer", profileNavigatorViewerEntity.getLocation().getLongitude());
+                .addValue("latitudeViewed", profileNavigatorViewedEntity.getLocation().getLatitude())
+                .addValue("longitudeViewed", profileNavigatorViewedEntity.getLocation().getLongitude());
         return namedParameterJdbcTemplate.queryForObject(
                 GET_NAVIGATOR_BETWEEN_SESSION_AND_VIEWER,
                 parameters,

@@ -25,7 +25,7 @@ public interface ProfileService {
 
     ResponseProfileShortInfoGetDto getProfileShortInfo(String sessionId, Double latitude, Double longitude);
 
-    ProfileImageEntity deleteImage(Long id);
+    void deleteImage(Long id);
 
     ResponseProfileFilterDto getFilterBySessionID(String sessionId, Double latitude, Double longitude);
 

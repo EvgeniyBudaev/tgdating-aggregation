@@ -239,21 +239,22 @@ public class ProfileServiceImpl implements ProfileService {
 
     @Override
     public ResponseProfileDetailGetDto getProfileDetail(
-            String sessionId, String viewerSessionId, Double latitude, Double longitude) {
-        updateLastOnline(viewerSessionId);
-        updateNavigator(viewerSessionId, latitude, longitude);
+            String sessionId, String viewedSessionId, Double latitude, Double longitude) {
+        updateLastOnline(sessionId);
+        updateNavigator(sessionId, latitude, longitude);
         ProfileEntity profileEntity = findBySessionID(sessionId);
         checkUserExists(profileEntity.getIsDeleted());
         ProfileNavigatorEntity profileNavigatorSessionEntity = findNavigatorBySessionID(sessionId);
-        ProfileNavigatorEntity profileNavigatorViewerEntity = findNavigatorBySessionID(viewerSessionId);
-        ProfileNavigatorDetailEntity profileNavigatorDetailEntity = profileRepository.findNavigatorBetweenSessionIDAndViewerSessionID(
-                profileNavigatorSessionEntity, profileNavigatorViewerEntity);
+        ProfileNavigatorEntity profileNavigatorViewedEntity = findNavigatorBySessionID(viewedSessionId);
+        ProfileNavigatorDetailEntity profileNavigatorDetailEntity = profileRepository
+                .findNavigatorBetweenSessionIDAndViewedSessionID(
+                profileNavigatorSessionEntity, profileNavigatorViewedEntity);
         double distanceValue = profileNavigatorDetailEntity.getDistance();
         Integer distanceAsInt = (int) Math.floor(distanceValue < MIN_DISTANCE ? MIN_DISTANCE : distanceValue);
         List<ProfileImageEntity> profileImageListEntity = findImageListBySessionID(sessionId);
         ProfileTelegramEntity profileTelegramEntity = findTelegramBySessionID(sessionId);
         Optional<ProfileLikeEntity> profileLikeEntity =
-                Optional.ofNullable(findLikeBySessionID(viewerSessionId, sessionId));
+                Optional.ofNullable(findLikeBySessionID(viewedSessionId, sessionId));
         boolean isOnline = Utils.calculateIsOnline(profileEntity.getLastOnline());
         return ResponseProfileDetailGetDto.builder()
                 .sessionId(profileEntity.getSessionId())
@@ -316,7 +317,7 @@ public class ProfileServiceImpl implements ProfileService {
     }
 
     @Override
-    public ProfileImageEntity deleteImage(Long id) {
+    public void deleteImage(Long id) {
         ProfileImageEntity profileImageEntity = profileRepository.findImageByID(id);
         if (profileImageEntity.getIsDeleted()) {
             throw new NotFoundException(
@@ -329,7 +330,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .resolve(profileImageEntity.getName())
                 .toString();
         deleteFileFromFileSystem(filePath);
-        return profileRepository.deleteImage(id);
+        profileRepository.deleteImage(id);
     }
 
     private void deleteImageAllBySessionID(String sessionId) {

@@ -5,7 +5,6 @@ import com.tgdating.aggregation.dto.response.*;
 import com.tgdating.aggregation.model.PaginationEntity;
 import com.tgdating.aggregation.model.ProfileBlockEntity;
 import com.tgdating.aggregation.model.ProfileComplaintEntity;
-import com.tgdating.aggregation.model.ProfileImageEntity;
 import com.tgdating.aggregation.service.ProfileService;
 import com.tgdating.aggregation.shared.Constants;
 import org.springframework.http.HttpStatus;
@@ -80,7 +79,7 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getProfileList(requestProfileListGetDto));
     }
 
-    @GetMapping("/{sessionId}")
+    @GetMapping("/session/{sessionId}")
     public ResponseEntity<ResponseProfileBySessionIdGetDto> getProfileBySessionID(
             @PathVariable String sessionId,
             @RequestParam(required = false) Double latitude,
@@ -90,19 +89,19 @@ public class ProfileController {
         return ResponseEntity.status(HttpStatus.OK).body(profileService.getBySessionID(sessionId, latitude, longitude));
     }
 
-    @GetMapping("/{sessionId}/detail")
+    @GetMapping("/detail/{sessionId}")
     public ResponseEntity<ResponseProfileDetailGetDto> getProfileDetail(
             @PathVariable String sessionId,
-            @RequestParam String viewerSessionId,
+            @RequestParam String viewedSessionId,
             @RequestParam(required = false) Double latitude,
             @RequestParam(required = false) Double longitude
     ) {
-        System.out.println("controller getProfileBySessionID sessionId: " + sessionId);
+        System.out.println("controller getProfileDetail sessionId: " + sessionId);
         return ResponseEntity.status(HttpStatus.OK)
-                .body(profileService.getProfileDetail(sessionId, viewerSessionId, latitude, longitude));
+                .body(profileService.getProfileDetail(sessionId, viewedSessionId, latitude, longitude));
     }
 
-    @GetMapping("/{sessionId}/short")
+    @GetMapping("/short/{sessionId}")
     public ResponseEntity<ResponseProfileShortInfoGetDto> getProfileShortInfo(
             @PathVariable String sessionId,
             @RequestParam(required = false) Double latitude,
@@ -114,15 +113,14 @@ public class ProfileController {
     }
 
     @DeleteMapping("/images/{id}")
-    public ResponseEntity<ProfileImageEntity> deleteImage(
+    public ResponseEntity<ResponseDto> deleteImage(
             @PathVariable Long id
     ) {
         System.out.println("controller deleteImage id: " + id);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(profileService.deleteImage(id));
+        return ResponseEntity.status(HttpStatus.OK).body(ResponseDto.builder().success(true).build());
     }
 
-    @GetMapping("/{sessionId}/filter")
+    @GetMapping("/filter/{sessionId}")
     public ResponseEntity<ResponseProfileFilterDto> getFilterBySessionID(
             @PathVariable String sessionId,
             @RequestParam(required = false) Double latitude,

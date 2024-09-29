@@ -40,7 +40,7 @@ public interface ProfileRepository {
 
     ProfileNavigatorEntity findNavigatorBySessionID(String sessionId);
 
-    ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewerSessionID(
+    ProfileNavigatorDetailEntity findNavigatorBetweenSessionIDAndViewedSessionID(
             ProfileNavigatorEntity profileNavigatorSessionEntity, ProfileNavigatorEntity profileNavigatorViewerEntity);
 
     ProfileFilterEntity addFilter(RequestProfileFilterAddDto requestProfileFilterAddDto);
