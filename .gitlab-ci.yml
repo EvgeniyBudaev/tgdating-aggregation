@@ -1,0 +1,10 @@
+include:
+  - project: 'evgeniybudaev/ci-cd'
+    ref: main
+    file: '.gitlab-ci/.gitlab-ci-main.yml'
+
+build_docker_compose_postgres:
+  extends: '.build_docker_compose'
+
+deploy_docker_compose_postgres:
+  extends:  '.deploy_docker_compose'
