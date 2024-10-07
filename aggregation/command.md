@@ -112,3 +112,8 @@ docker image ls # Отобразит информацию обо всех обр
 ```
 docker network create web-network
 ```
+
+Вход на сервер
+```
+ssh root@91.236.199.58
+```
